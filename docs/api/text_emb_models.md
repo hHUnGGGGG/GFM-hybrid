@@ -1,1 +1,1 @@
-::: gfmrag.text_emb_models
+::: gfmrag_hybrid.text_emb_models

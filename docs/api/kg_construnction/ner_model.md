@@ -1,1 +1,1 @@
-::: gfmrag.kg_construction.ner_model
+::: gfmrag_hybrid.kg_construction.ner_model

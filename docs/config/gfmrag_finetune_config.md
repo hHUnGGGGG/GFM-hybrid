@@ -3,8 +3,8 @@ An example configuration file for GFM fine-tuning is shown below:
 
 !!! example
 
-    ```yaml title="gfmrag/workflow/config/stage2_qa_finetune.yaml"
-    --8<-- "gfmrag/workflow/config/stage2_qa_finetune.yaml"
+    ```yaml title="gfmrag_hybrid/workflow/config/stage2_qa_finetune.yaml"
+    --8<-- "gfmrag_hybrid/workflow/config/stage2_qa_finetune.yaml"
     ```
 
 ## General Configuration
@@ -24,7 +24,7 @@ An example configuration file for GFM fine-tuning is shown below:
 
 |         Parameter          | Options |                                  Note                                   |
 | :------------------------: | :-----: | :---------------------------------------------------------------------: |
-|        `_target_`        |  None   |                 [QADataset][gfmrag.datasets.QADataset]                  |
+|        `_target_`        |  None   |                 [QADataset][gfmrag_hybrid.datasets.QADataset]                  |
 |        `cfgs.root`         |  None   |               root dictionary of the datasets saving path               |
 |    `cfgs.force_rebuild`    |  None   |                  whether to force rebuild the dataset                   |
 | `cfgs.text_emb_model_cfgs` |  None   | [text embedding model][text-embedding-model-configuration]configuration |
@@ -35,8 +35,8 @@ An example configuration file for GFM fine-tuning is shown below:
 
 |    Parameter     |            Options             |                          Note                          |
 | :--------------: | :----------------------------: | :----------------------------------------------------: |
-|   `_target_`   |              None              |        [QueryGNN][gfmrag.models.QueryGNN] model        |
-|  `entity_model`  |              None              | [EntityNBFNet][gfmrag.ultra.models.QueryNBFNet] model |
+|   `_target_`   |              None              |        [QueryGNN][gfmrag_hybrid.models.QueryGNN] model        |
+|  `entity_model`  |              None              | [EntityNBFNet][gfmrag_hybrid.ultra.models.QueryNBFNet] model |
 |   `input_dim`    |              None              |              input dimension of the model              |
 |  `hidden_dims`   |              `[]`              |             hidden dimensions of the model             |
 |  `message_func`  |  `transe`,`rotate`,`distmult`  |             message function of the model              |
@@ -54,7 +54,7 @@ An example configuration file for GFM fine-tuning is shown below:
 | `metric` |  None   |    evaluation metrics to use    |
 | `losses` |  None   |    list of losses to use    |
 | `losses[].name` |  None   |    name of the loss    |
-| `losses[]._target_` |  None   |    [loss function][gfmrag.losses.BaseLoss] to use    |
+| `losses[]._target_` |  None   |    [loss function][gfmrag_hybrid.losses.BaseLoss] to use    |
 | `losses[].cfg` |  None   |    configuration of the loss    |
 | `losses[].cfg.weight` |  None   |    weight of the loss    |
 | `losses[].cfg.is_doc_loss` |  None   |    whether the loss is for document    |

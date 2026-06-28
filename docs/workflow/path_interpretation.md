@@ -12,22 +12,22 @@ The top-$k$ path interpretations can be obtained by the top-$k$ longest paths wi
 
 You can visualize the paths and their importance using the following code:
 
-??? example "gfmrag/workflow/config/exp_visualize_path.yaml"
+??? example "gfmrag_hybrid/workflow/config/exp_visualize_path.yaml"
 
-    ```yaml title="gfmrag/workflow/config/exp_visualize_path.yaml"
-    --8<-- "gfmrag/workflow/config/exp_visualize_path.yaml"
+    ```yaml title="gfmrag_hybrid/workflow/config/exp_visualize_path.yaml"
+    --8<-- "gfmrag_hybrid/workflow/config/exp_visualize_path.yaml"
     ```
 
-??? example "gfmrag/workflow/experiments/visualize_path.py"
+??? example "gfmrag_hybrid/workflow/experiments/visualize_path.py"
 
     <!-- blacken-docs:off -->
-    ```python title="gfmrag/workflow/experiments/visualize_path.py"
-    --8<--"gfmrag/workflow/experiments/visualize_path.py"
+    ```python title="gfmrag_hybrid/workflow/experiments/visualize_path.py"
+    --8<--"gfmrag_hybrid/workflow/experiments/visualize_path.py"
     ```
     <!-- blacken-docs:on -->
 
 ```bash
-python -m gfmrag.workflow.experiments.visualize_path
+python -m gfmrag_hybrid.workflow.experiments.visualize_path
 ```
 
 Path Examples

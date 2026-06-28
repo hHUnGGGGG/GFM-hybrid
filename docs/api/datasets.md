@@ -1,1 +1,1 @@
-::: gfmrag.datasets
+::: gfmrag_hybrid.datasets

@@ -1,11 +1,11 @@
-# Đổi tên `gfmrag` → `gfmrag_hybrid` và tách hai sub-package `bm25/` + `gfm/`
+# Đổi tên `gfmrag_hybrid` → `gfmrag_hybrid` và tách hai sub-package `bm25/` + `gfm/`
 
 **Ngày:** 2026-06-28
 **Trạng thái:** Đã duyệt thiết kế, chờ viết plan
 
 ## 1. Mục tiêu
 
-1. Đổi tên gói Python `gfmrag` thành `gfmrag_hybrid` (cả thư mục import lẫn
+1. Đổi tên gói Python `gfmrag_hybrid` thành `gfmrag_hybrid` (cả thư mục import lẫn
    distribution name trong `pyproject.toml`).
 2. Trong gói mới, tổ chức lại thành hai sub-package có ranh giới rõ ràng:
    - `gfmrag_hybrid/bm25/` — nhánh truy hồi từ vựng (phần đóng góp hybrid).
@@ -19,20 +19,20 @@ toàn bộ hạ tầng upstream.
 
 ## 2. Bối cảnh hiện trạng
 
-- Gói `gfmrag` gồm 75 file `.py`. Chuỗi `gfmrag` xuất hiện ~433 lần trên 42 file
+- Gói `gfmrag_hybrid` gồm 75 file `.py`. Chuỗi `gfmrag_hybrid` xuất hiện ~433 lần trên 42 file
   `.py`, 37 file config `.yaml/.yml`, 30 file `.md`. Không có biến thể
   `gfm-rag` / `gfm_rag` trong code (chỉ một tham chiếu `gfm-rag/` trong README
   cho đường dẫn `.env`, KHÔNG đụng tới).
 - **Trùng lặp lớn:** `BM25Searcher`, `normalize_entity` / `normalize_entities`,
   `VIETNAMESE_STOPWORDS`, và `agent_reasoning_with_reranker` bị chép gần như y hệt
   trong 5 file:
-  - `gfmrag/workflow/core_engine.py` (bản dùng làm chuẩn — không có `@hydra.main`)
-  - `gfmrag/workflow/stage3_qa_ircot_inference_chunks.py` (dùng `ENGLISH_STOPWORDS`)
-  - `gfmrag/workflow/stage3_qa_ircot_inference_chunks_vietnamese_medical.py`
-  - `gfmrag/workflow/update.py`
-  - `gfmrag/workflow/test.py` (chỉ có `normalize_entity(s)`)
-- Nhánh GFM hiện ở: `gfmrag/gfmrag_retriever.py` (class `GFMRetriever`,
-  hàm `dedup_retrieved_docs`) và `gfmrag/gfmrag_retriever_with_entity_scores.py`
+  - `gfmrag_hybrid/workflow/core_engine.py` (bản dùng làm chuẩn — không có `@hydra.main`)
+  - `gfmrag_hybrid/workflow/stage3_qa_ircot_inference_chunks.py` (dùng `ENGLISH_STOPWORDS`)
+  - `gfmrag_hybrid/workflow/stage3_qa_ircot_inference_chunks_vietnamese_medical.py`
+  - `gfmrag_hybrid/workflow/update.py`
+  - `gfmrag_hybrid/workflow/test.py` (chỉ có `normalize_entity(s)`)
+- Nhánh GFM hiện ở: `gfmrag_hybrid/gfmrag_retriever.py` (class `GFMRetriever`,
+  hàm `dedup_retrieved_docs`) và `gfmrag_hybrid/gfmrag_retriever_with_entity_scores.py`
   (class `GFMRetrieverWithEntityScores`, dataclass `EntityScore`).
 - `BM25Searcher` nhận `stopwords` qua tham số constructor → class là chung,
   chỉ hằng số stopwords (vi/en) khác nhau theo từng script gọi.
@@ -44,20 +44,20 @@ toàn bộ hạ tầng upstream.
 ## 3. Phạm vi đổi tên (Phần 1)
 
 ### 3.1 Quy tắc thay thế
-- `git mv gfmrag gfmrag_hybrid` để giữ lịch sử git của từng file.
+- `git mv gfmrag_hybrid gfmrag_hybrid` để giữ lịch sử git của từng file.
 - Thay theo **ranh giới từ** `\bgfmrag\b` → `gfmrag_hybrid` trên các đuôi:
   `.py .yaml .yml .toml .md .ini .cfg .txt` (loại trừ thư mục `.git/`).
-- Ranh giới từ là bắt buộc: `gfmrag.workflow` / `gfmrag/ultra` / `"gfmrag"` PHẢI
+- Ranh giới từ là bắt buộc: `gfmrag_hybrid.workflow` / `gfmrag_hybrid/ultra` / `"gfmrag_hybrid"` PHẢI
   đổi, nhưng tiền tố tên file con `gfmrag_retriever` (ký tự kế là `_`, vẫn là
   word char) PHẢI giữ nguyên. Regex `\bgfmrag\b` thỏa cả hai điều này.
 
 ### 3.2 Các điểm cụ thể
-- `pyproject.toml`: `name = "gfmrag"` → `"gfmrag_hybrid"`;
-  `packages = [{ include = "gfmrag" }]` → `include = "gfmrag_hybrid"`;
-  `exclude = ["gfmrag/ultra"]` → `["gfmrag_hybrid/ultra"]`.
-- Toàn bộ import `from gfmrag...` / `import gfmrag` / Hydra `_target_: gfmrag....`
-  trong config, lệnh `python -m gfmrag.workflow...` trong README/docs.
-- Sau bước này: `pip uninstall gfmrag` rồi `pip install -e .` lại.
+- `pyproject.toml`: `name = "gfmrag_hybrid"` → `"gfmrag_hybrid"`;
+  `packages = [{ include = "gfmrag_hybrid" }]` → `include = "gfmrag_hybrid"`;
+  `exclude = ["gfmrag_hybrid/ultra"]` → `["gfmrag_hybrid/ultra"]`.
+- Toàn bộ import `from gfmrag_hybrid...` / `import gfmrag_hybrid` / Hydra `_target_: gfmrag_hybrid....`
+  trong config, lệnh `python -m gfmrag_hybrid.workflow...` trong README/docs.
+- Sau bước này: `pip uninstall gfmrag_hybrid` rồi `pip install -e .` lại.
 
 ### 3.3 Kiểm chứng bước rename
 - `python -c "import gfmrag_hybrid"` thành công.
@@ -96,9 +96,9 @@ gfm/
 └── retriever_with_entity_scores.py   # ← git mv gfmrag_retriever_with_entity_scores.py
 ```
 - Cập nhật import nội bộ trong file đã chuyển:
-  - `retriever_with_entity_scores.py`: `from gfmrag import GFMRetriever` →
+  - `retriever_with_entity_scores.py`: `from gfmrag_hybrid import GFMRetriever` →
     `from gfmrag_hybrid.gfm import GFMRetriever`;
-    `from gfmrag.gfmrag_retriever import dedup_retrieved_docs` →
+    `from gfmrag_hybrid.gfmrag_retriever import dedup_retrieved_docs` →
     `from gfmrag_hybrid.gfm.retriever import dedup_retrieved_docs`.
 - Cập nhật mọi nơi import retriever sang đường dẫn `gfm/` mới:
   `utils/qa_utils.py` (`EntityScore`), `workflow/app.py`,
@@ -144,4 +144,4 @@ gfm/
 - Hai retriever nằm trong `gfmrag_hybrid/gfm/`; mọi importer trỏ đúng.
 - `pytest`, `mypy`, `pre-commit` pass (hoặc giữ nguyên trạng thái pass/fail như
   trước khi thay đổi, không phát sinh lỗi mới do refactor).
-- Không còn tham chiếu package `gfmrag` (dạng `\bgfmrag\b`) ngoài tên file con.
+- Không còn tham chiếu package `gfmrag_hybrid` (dạng `\bgfmrag\b`) ngoài tên file con.

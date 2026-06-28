@@ -15,10 +15,10 @@ data_name/
 ## Config
 You need to create a KG-index configuration file.
 
-??? example "gfmrag/workflow/config/stage1_index_dataset.yaml"
+??? example "gfmrag_hybrid/workflow/config/stage1_index_dataset.yaml"
 
-    ```yaml title="gfmrag/workflow/config/stage1_index_dataset.yaml"
-    --8<-- "gfmrag/workflow/config/stage1_index_dataset.yaml"
+    ```yaml title="gfmrag_hybrid/workflow/config/stage1_index_dataset.yaml"
+    --8<-- "gfmrag_hybrid/workflow/config/stage1_index_dataset.yaml"
     ```
 
 Details of the configuration parameters are explained in the [KG-index Configuration][kg-index-configuration] page.
@@ -55,22 +55,22 @@ root/
 
 To index the data, run the following command:
 
-??? example "gfmrag/workflow/stage1_index_dataset.py"
+??? example "gfmrag_hybrid/workflow/stage1_index_dataset.py"
 
 	<!-- blacken-docs:off -->
-    ```python title="gfmrag/workflow/stage1_index_dataset.py"
-    --8<-- "gfmrag/workflow/stage1_index_dataset.py"
+    ```python title="gfmrag_hybrid/workflow/stage1_index_dataset.py"
+    --8<-- "gfmrag_hybrid/workflow/stage1_index_dataset.py"
     ```
 	<!-- blacken-docs:on -->
 
 ```bash
-python -m gfmrag.workflow.stage1_index_dataset
+python -m gfmrag_hybrid.workflow.stage1_index_dataset
 ```
 
 You can overwrite the configuration like this:
 
 ```bash
-python -m gfmrag.workflow.stage1_index_dataset kg_constructor.num_processes=5
+python -m gfmrag_hybrid.workflow.stage1_index_dataset kg_constructor.num_processes=5
 ```
 
 ## Output Files

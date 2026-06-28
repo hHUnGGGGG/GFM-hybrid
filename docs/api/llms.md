@@ -1,1 +1,1 @@
-::: gfmrag.llms
+::: gfmrag_hybrid.llms

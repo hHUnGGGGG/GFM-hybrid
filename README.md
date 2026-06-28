@@ -7,7 +7,7 @@
 > Nguyen Minh Hung¹, Lê Văn Thành² — ¹School of Information and Communication
 > Technology, Hanoi University of Science and Technology (HUST).
 
-Đây là **gói mã nguồn (`gfmrag`)** của GFM-Hybrid — một pipeline **truy hồi + suy
+Đây là **gói mã nguồn (`gfmrag_hybrid`)** của GFM-Hybrid — một pipeline **truy hồi + suy
 luận hợp nhất** cho hỏi đáp đa bước (multi-hop) và hỏi đáp y tế. Ý tưởng cốt lõi:
 một **Graph Foundation Model (GFM-RAG)** khi suy luận trên đồ thị tri thức sinh ra
 một **tensor độ liên quan thực thể** $P_q \in [0,1]^{|\mathcal{V}|}$ — thay vì vứt
@@ -44,10 +44,10 @@ Mỗi bước gồm pha truy hồi (đồ thị + BM25 theo thực thể) và ph
 
 1. **Graph-Foundation Retriever with Entity Scores** — trả về *cả* tài liệu xếp
    hạng *và* tensor $\tilde{P}_q$ (chuẩn hóa min–max); chunk chấm bằng RRF ($k=60$).
-   → `gfmrag/gfmrag_retriever_with_entity_scores.py`
+   → `gfmrag_hybrid/gfmrag_retriever_with_entity_scores.py`
 2. **Entity-Augmented BM25 Retrieval** — ghép seed entities + thực thể đồ thị điểm
    cao ($\tilde{P}_q \ge \theta=0.10$) + sub-question thành **một** câu BM25.
-   → `gfmrag/workflow/core_engine.py` (`BM25Searcher`)
+   → `gfmrag_hybrid/workflow/core_engine.py` (`BM25Searcher`)
 3. **Step-Local Global Chunk Pool** — gộp hai nhánh, giữ riêng điểm, **làm mới mỗi
    bước**. → `core_engine.py`
 4. **Cross-Encoder Reranking + IRCoT** — `BAAI/bge-reranker-v2-m3` (max-pooling) +
@@ -63,14 +63,14 @@ Mỗi bước gồm pha truy hồi (đồ thị + BM25 theo thực thể) và ph
 Tách chunk (LLM/SemanticChunker) → NER + trích triple → ma trận thực thể–tài liệu →
 thêm quan hệ đồng nghĩa. Trong repo, bước offline gồm **Stage 0** (splitter, đa ngôn
 ngữ vi/en) và **Stage 1** (tùy chọn gom cụm chunk + xây KG) — xem
-`gfmrag/workflow/stage0_split_documents.py` và `gfmrag/kg_construction/chunk_grouper.py`.
+`gfmrag_hybrid/workflow/stage0_split_documents.py` và `gfmrag_hybrid/kg_construction/chunk_grouper.py`.
 
 ---
 
-## 3. Cấu trúc gói `gfmrag`
+## 3. Cấu trúc gói `gfmrag_hybrid`
 
 ```
-gfmrag/
+gfmrag_hybrid/
 ├── gfmrag_retriever_with_entity_scores.py     # Component 1 (GFM + entity scores)
 ├── chunkers/document_chunker.py               # SemanticChunker (tách chunk)
 ├── kg_construction/chunk_grouper.py           # Gom cụm chunk (stage1)
@@ -109,7 +109,7 @@ conda create -n gfmhybrid python=3.12 && conda activate gfmhybrid
 conda install cuda-toolkit -c nvidia/label/cuda-12.4.1
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 pip install -r requirements.txt
-pip install -e .            # cài gói gfmrag (editable)
+pip install -e .            # cài gói gfmrag_hybrid (editable)
 ```
 
 Tạo `.env` trong `gfm-rag/` (KHÔNG commit):
@@ -138,24 +138,24 @@ HF_TOKEN=hf_...
 
 ```bash
 # Stage 0 — tách document -> chunk (đa ngôn ngữ vi/en)
-python -m gfmrag.workflow.stage0_split_documents \
+python -m gfmrag_hybrid.workflow.stage0_split_documents \
     dataset.data_name=vietnamese_medical language=vi
 
 # Stage 1 — xây KG-index (bật gom cụm chunk tùy chọn)
-python -m gfmrag.workflow.stage1_index_dataset \
+python -m gfmrag_hybrid.workflow.stage1_index_dataset \
     dataset.data_name=vietnamese_medical language=vi \
     chunk_grouping.enabled=true chunk_grouping.granularity=chunk
 
 # Stage 2 — (tùy chọn) pre-train / fine-tune GFM
-python -m gfmrag.workflow.stage2_kg_pretrain
-python -m gfmrag.workflow.stage2_qa_finetune
+python -m gfmrag_hybrid.workflow.stage2_kg_pretrain
+python -m gfmrag_hybrid.workflow.stage2_qa_finetune
 
 # Stage 3 — suy luận IRCoT (GFM-Hybrid)
-python -m gfmrag.workflow.stage3_qa_ircot_inference_chunks_vietnamese_medical \
+python -m gfmrag_hybrid.workflow.stage3_qa_ircot_inference_chunks_vietnamese_medical \
     dataset.data_name=vietnamese_medical test.max_steps=3 test.top_k=5
 
 # Chatbot web
-cd gfmrag/workflow && streamlit run app.py
+cd gfmrag_hybrid/workflow && streamlit run app.py
 ```
 
 ## 8. Siêu tham số (theo bài báo)

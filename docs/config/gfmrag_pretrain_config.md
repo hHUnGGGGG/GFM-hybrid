@@ -3,8 +3,8 @@ An example configuration file for GFM pre-training is shown below:
 
 !!! example
 
-    ```yaml title="gfmrag/workflow/config/stage2_kg_pretrain.yaml"
-    --8<-- "gfmrag/workflow/config/stage2_kg_pretrain.yaml"
+    ```yaml title="gfmrag_hybrid/workflow/config/stage2_kg_pretrain.yaml"
+    --8<-- "gfmrag_hybrid/workflow/config/stage2_kg_pretrain.yaml"
     ```
 
 ## General Configuration
@@ -24,7 +24,7 @@ An example configuration file for GFM pre-training is shown below:
 
 |         Parameter          | Options |                                  Note                                   |
 | :------------------------: | :-----: | :---------------------------------------------------------------------: |
-|        `_target_`        |  None   |                 [KGDataset][gfmrag.datasets.KGDataset]                  |
+|        `_target_`        |  None   |                 [KGDataset][gfmrag_hybrid.datasets.KGDataset]                  |
 |        `cfgs.root`         |  None   |               root dictionary of the datasets saving path               |
 |    `cfgs.force_rebuild`    |  None   |                  whether to force rebuild the dataset                   |
 | `cfgs.text_emb_model_cfgs` |  None   | [text embedding model][text-embedding-model-configuration] configuration |
@@ -35,8 +35,8 @@ An example configuration file for GFM pre-training is shown below:
 
 |    Parameter     |            Options             |                          Note                          |
 | :--------------: | :----------------------------: | :----------------------------------------------------: |
-|   `_target_`   |              None              |        [QueryGNN][gfmrag.models.QueryGNN] model        |
-|  `entity_model`  |              None              | [EntityNBFNet][gfmrag.ultra.models.EntityNBFNet] model |
+|   `_target_`   |              None              |        [QueryGNN][gfmrag_hybrid.models.QueryGNN] model        |
+|  `entity_model`  |              None              | [EntityNBFNet][gfmrag_hybrid.ultra.models.EntityNBFNet] model |
 |   `input_dim`    |              None              |              input dimension of the model              |
 |  `hidden_dims`   |              `[]`              |             hidden dimensions of the model             |
 |  `message_func`  |  `transe`,`rotate`,`distmult`  |             message function of the model              |

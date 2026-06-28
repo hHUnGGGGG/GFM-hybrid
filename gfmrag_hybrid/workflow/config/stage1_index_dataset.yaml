@@ -1,0 +1,64 @@
+run:
+  dir: outputs/stage1_index_dataset
+
+dataset:
+  root: E:\arag\gfm-rag\data
+  data_name: vietnamese_medical
+
+# Ngôn ngữ corpus: vi | en (chi phối tách từ + embedding mặc định khi gom cụm)
+language: vi
+
+# Gom cụm chunk/document theo chủ đề (cùng bệnh/thuốc) thành 1 document, GHI ĐÈ
+# dataset_corpus.json + precomputed_chunks.json trước khi xây KG.
+chunk_grouping:
+  enabled: false        # bật để tự gom cụm trong stage1
+  granularity: chunk    # chunk | document
+  model_name: null      # null -> theo language (vi: vietnamese-embedding, en: bge-large-en)
+  distance_threshold: 0.075
+  linkage: average
+  use_llm_naming: true
+  llm_base_url: https://api.yescale.io/v1
+  llm_model: gpt-4o-mini
+  backup: true          # backup *.bak trước khi ghi đè
+
+ner_model:
+  _target_: gfmrag_hybrid.kg_construction.ner_model.LLMNERModel
+  llm_api: openai
+  model_name: gpt-4.0-mini
+  max_tokens: 4096          # tăng từ 2048 → 4096
+
+openie_model:
+  _target_: gfmrag_hybrid.kg_construction.openie_model.LLMOPENIEModel
+  llm_api: openai
+  model_name: gpt-4.0-mini
+  max_ner_tokens: 4096      # tăng từ 2048 → 4096
+  max_triples_tokens: 16384 # tăng từ 8192 → 16384
+
+el_model:
+  _target_: gfmrag_hybrid.kg_construction.entity_linking_model.DPRELModel
+  model_name: dangvantuan/vietnamese-embedding
+  root: tmp
+  use_cache: true
+  normalize: true
+  batch_size: 4
+
+kg_constructor:
+  _target_: gfmrag_hybrid.kg_construction.KGConstructor
+  root: tmp/kg_construction
+  num_processes: 4
+  cosine_sim_edges: true
+  threshold: 0.8
+  max_sim_neighbors: 100
+  add_title: true
+  force: false
+  open_ie_model: ${openie_model}
+  ner_model: ${ner_model}
+  el_model: ${el_model}
+
+qa_constructor:
+  _target_: gfmrag_hybrid.kg_construction.QAConstructor
+  root: tmp/qa_construction
+  num_processes: 4
+  force: false
+  ner_model: ${ner_model}
+  el_model: ${el_model}

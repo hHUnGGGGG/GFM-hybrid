@@ -5,18 +5,18 @@ An example of a Colbert EL model configuration file is shown below:
 
 !!! example "colbertv2.0"
 
-    ```yaml title="gfmrag/workflow/config/el_model/colbert_el_model.yaml"
-    --8<-- "gfmrag/workflow/config/el_model/colbert_el_model.yaml"
+    ```yaml title="gfmrag_hybrid/workflow/config/el_model/colbert_el_model.yaml"
+    --8<-- "gfmrag_hybrid/workflow/config/el_model/colbert_el_model.yaml"
     ```
 
 |      Parameter      |                           Options                            |                                               Note                                               |
 | :-----------------: | :----------------------------------------------------------: | :----------------------------------------------------------------------------------------------: |
-|     `_target_`      | `gfmrag.kg_construction.entity_linking_model.ColbertELModel` | The class name of [Colbert EL model][gfmrag.kg_construction.entity_linking_model.ColbertELModel] |
+|     `_target_`      | `gfmrag_hybrid.kg_construction.entity_linking_model.ColbertELModel` | The class name of [Colbert EL model][gfmrag_hybrid.kg_construction.entity_linking_model.ColbertELModel] |
 |  `model_name_or_path`  |                             None                             |                                 The path to the checkpoint file.                                 |
 |       `root`        |                             None                             |                                 The root directory of the model.                                 |
 | `force` |                     `True`, `False`                          | Whether to force re-indexing the entities. If set to `True`, it will delete the existing index and re-index the entities. |
 
-Please refer to [ColbertELModel][gfmrag.kg_construction.entity_linking_model.ColbertELModel] for details on the other parameters.
+Please refer to [ColbertELModel][gfmrag_hybrid.kg_construction.entity_linking_model.ColbertELModel] for details on the other parameters.
 
 ## Dense Pre-train Text Embedding Model Configuration
 
@@ -24,14 +24,14 @@ This configuration supports most of the dense pre-train text embedding models of
 
 !!! example "DPR EL Model"
 
-    ```yaml title="gfmrag/workflow/config/el_model/dpr_el_model.yaml"
-    --8<-- "gfmrag/workflow/config/el_model/dpr_el_model.yaml"
+    ```yaml title="gfmrag_hybrid/workflow/config/el_model/dpr_el_model.yaml"
+    --8<-- "gfmrag_hybrid/workflow/config/el_model/dpr_el_model.yaml"
     ```
 
 
 |     Parameter      |                         Options                          |                                                       Note                                                       |
 | :----------------: | :------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------: |
-|     `_target_`     | `gfmrag.kg_construction.entity_linking_model.DPRELModel` | The class name of [Dense Pre-train Text Embedding model][gfmrag.kg_construction.entity_linking_model.DPRELModel] |
+|     `_target_`     | `gfmrag_hybrid.kg_construction.entity_linking_model.DPRELModel` | The class name of [Dense Pre-train Text Embedding model][gfmrag_hybrid.kg_construction.entity_linking_model.DPRELModel] |
 |    `model_name`    |                           None                           |                              The name of the dense pre-train text embedding model.                               |
 |       `root`       |                           None                           |                                         The root directory of the model.                                         |
 |    `use_cache`     |                     `True`, `False`                      |                                              Whether to use cache.                                               |
@@ -40,7 +40,7 @@ This configuration supports most of the dense pre-train text embedding models of
 | `passage_instruct` |                           None                           |                                         The instruction for the passage.                                         |
 |   `model_kwargs`   |                           None                           |                                         The additional model arguments.                                          |
 
-Please refer to [DPR EL Model][gfmrag.kg_construction.entity_linking_model.DPRELModel] for details on the other parameters.
+Please refer to [DPR EL Model][gfmrag_hybrid.kg_construction.entity_linking_model.DPRELModel] for details on the other parameters.
 
 ## Nvidia Embedding Model Configuration
 
@@ -48,13 +48,13 @@ This configuration supports most of the [Nvidia embedding models](https://huggin
 
 !!! example "nvidia/NV-Embed-v2"
 
-    ```yaml title="gfmrag/workflow/config/el_model/nv_embed_v2.yaml"
-    --8<-- "gfmrag/workflow/config/el_model/nv_embed_v2.yaml"
+    ```yaml title="gfmrag_hybrid/workflow/config/el_model/nv_embed_v2.yaml"
+    --8<-- "gfmrag_hybrid/workflow/config/el_model/nv_embed_v2.yaml"
     ```
 
 |     Parameter      |                                                   Options                                                   |                                                   Note                                                   |
 | :----------------: | :---------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------: |
-|     `_target_`     |                       `gfmrag.kg_construction.entity_linking_model.NVEmbedV2ELModel`                        | The class name of [Nvidia Embedding model][gfmrag.kg_construction.entity_linking_model.NVEmbedV2ELModel] |
+|     `_target_`     |                       `gfmrag_hybrid.kg_construction.entity_linking_model.NVEmbedV2ELModel`                        | The class name of [Nvidia Embedding model][gfmrag_hybrid.kg_construction.entity_linking_model.NVEmbedV2ELModel] |
 |    `model_name`    |                                            `nvidia/NV-Embed-v2`                                             |                                 The name of the Nvidia embedding model.                                  |
 |       `root`       |                                                    None                                                     |                                     The root directory of the model.                                     |
 |    `use_cache`     |                                               `True`, `False`                                               |                                          Whether to use cache.                                           |
@@ -64,4 +64,4 @@ This configuration supports most of the [Nvidia embedding models](https://huggin
 |   `model_kwargs`   |                                                    `{}`                                                     |                                     The additional model arguments.                                      |
 
 
-Please refer to [NVEmbedV2 EL Model][gfmrag.kg_construction.entity_linking_model.NVEmbedV2ELModel] for details on the other parameters.
+Please refer to [NVEmbedV2 EL Model][gfmrag_hybrid.kg_construction.entity_linking_model.NVEmbedV2ELModel] for details on the other parameters.

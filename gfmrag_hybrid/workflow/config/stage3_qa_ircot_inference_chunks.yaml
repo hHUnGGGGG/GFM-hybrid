@@ -1,0 +1,51 @@
+﻿hydra:
+  run:
+    dir: outputs/qa_agent_inference/${dataset.data_name}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+
+defaults:
+  - _self_
+  - text_emb_model: mpnet.yaml
+  - doc_ranker: idf_topk_ranker
+  - agent_prompt: musique_ircot
+  - qa_prompt: musique
+  - ner_model: llm_ner_model
+  - el_model: dpe_el_model_musique.yaml
+  - qa_evaluator: musique
+
+seed: 1024
+
+use_chunks: true
+
+precomputed_chunks_path: ${dataset.root}/${dataset.data_name}/processed/stage1/precomputed_chunks.json
+
+dataset:
+  root: E:\arag\gfm-rag\data
+  data_name: 2wikimultihopqa_test
+
+llm:
+  _target_: gfmrag_hybrid.llms.ChatGPT
+  model_name_or_path: gpt-4o-mini
+  base_url: https://api.yescale.io/v1
+  retry: 5
+
+graph_retriever:
+  model_path: E:\arag\gfm-rag\gfm_model
+  doc_ranker: ${doc_ranker}
+  ner_model: ${ner_model}
+  el_model: ${el_model}
+  qa_evaluator: ${qa_evaluator}
+  init_entities_weight: True
+
+test:
+  top_k: 5
+  top_k_chunks: 5
+  max_steps: 3
+  max_test_samples: 1
+  resume: null
+  top_entity_k: 15
+  max_bm25_chunks: 15
+  max_gfm_chunks: 20
+
+doc_ranker:
+  _target_: gfmrag_hybrid.doc_rankers.IDFWeightedTopKRanker
+  top_k: 30
