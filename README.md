@@ -33,7 +33,7 @@ ra JSON có cấu trúc điều phối toàn bộ qua nhiều bước.
 
 ## 1. Kiến trúc tổng quan
 
-![Kiến trúc tổng quan GFM-Hybrid](../SOICT_DATN_Research/Figure/pipeline_overview.png)
+![Kiến trúc tổng quan GFM-Hybrid](assets/figures/pipeline_overview.png)
 
 Vòng lặp xen kẽ chạy tối đa `max_steps` bước, duy trì **bốn bộ nhớ toàn cục**:
 **global chunk pool** (xóa sạch đầu mỗi bước), **cumulative facts** (ngữ cảnh dài
@@ -54,16 +54,16 @@ Mỗi bước gồm pha truy hồi (đồ thị + BM25 theo thực thể) và ph
    LLM sinh JSON 5 trường (`reasoning`, `extracted_facts`, `missing_entities`,
    `sub_question`, `final_answer`). → `core_engine.py` (`agent_reasoning_with_reranker`)
 
-![Module truy hồi chi tiết](../img_2.png)
+![Module truy hồi chi tiết](assets/figures/retrieval_module.png)
 
 ## 2. Xây dựng đồ thị tri thức (offline)
 
-![Xây dựng KG offline](../img_1.png)
+![Xây dựng KG offline](assets/figures/kg_construction.png)
 
 Tách chunk (LLM/SemanticChunker) → NER + trích triple → ma trận thực thể–tài liệu →
 thêm quan hệ đồng nghĩa. Trong repo, bước offline gồm **Stage 0** (splitter, đa ngôn
-ngữ vi/en) và **Stage 1** (tùy chọn gom cụm chunk + xây KG). Xem
-[spec refactor tiền xử lý](../docs/superpowers/specs/2026-06-28-arag-preprocessing-refactor-design.md).
+ngữ vi/en) và **Stage 1** (tùy chọn gom cụm chunk + xây KG) — xem
+`gfmrag/workflow/stage0_split_documents.py` và `gfmrag/kg_construction/chunk_grouper.py`.
 
 ---
 
@@ -108,8 +108,8 @@ Mô hình mặc định (bài báo): LLM `GPT-4o-mini`, cross-encoder
 conda create -n gfmhybrid python=3.12 && conda activate gfmhybrid
 conda install cuda-toolkit -c nvidia/label/cuda-12.4.1
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-pip install -r ../requirements.txt
-pip install -e .            # cài gói gfmrag (editable) — chạy trong thư mục gfm-rag/
+pip install -r requirements.txt
+pip install -e .            # cài gói gfmrag (editable)
 ```
 
 Tạo `.env` trong `gfm-rag/` (KHÔNG commit):
@@ -174,7 +174,7 @@ cd gfmrag/workflow && streamlit run app.py
 
 ```bash
 export OPENAI_API_KEY="sk-..."
-python ../LLM_as_a_judge.py --input prediction.jsonl --output evaluated.jsonl --workers 5
+python LLM_as_a_judge.py --input prediction.jsonl --output evaluated.jsonl --workers 5
 ```
 `prediction.jsonl` mỗi dòng: `id`, `question`, `answer` (tham chiếu), `response`.
 

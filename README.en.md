@@ -28,7 +28,7 @@ loop with structured JSON output drives the process across multiple hops.
 
 ## 1. Overall Architecture
 
-![GFM-Hybrid overall architecture](../SOICT_DATN_Research/Figure/pipeline_overview.png)
+![GFM-Hybrid overall architecture](assets/figures/pipeline_overview.png)
 
 The interleaved loop runs for up to `max_steps` steps and maintains **four global
 memories**: a **global chunk pool** (cleared at the start of each step),
@@ -51,17 +51,17 @@ repeated lookups), and **previous sub-questions**. Each step runs a retrieval ph
    `missing_entities`, `sub_question`, `final_answer`).
    → `core_engine.py` (`agent_reasoning_with_reranker`)
 
-![Detailed retrieval module](../img_2.png)
+![Detailed retrieval module](assets/figures/retrieval_module.png)
 
 ## 2. Offline Knowledge-Graph Construction
 
-![Offline KG construction](../img_1.png)
+![Offline KG construction](assets/figures/kg_construction.png)
 
 Documents are chunked (LLM/SemanticChunker) → NER + triple extraction →
 entity–document matrix → synonym merging. In this repo the offline stage is
 organised into **Stage 0** (splitter, bilingual vi/en) and **Stage 1** (optional
-chunk grouping + KG building). See the
-[preprocessing refactor spec](../docs/superpowers/specs/2026-06-28-arag-preprocessing-refactor-design.md).
+chunk grouping + KG building) — see `gfmrag/workflow/stage0_split_documents.py` and
+`gfmrag/kg_construction/chunk_grouper.py`.
 
 ---
 
@@ -106,8 +106,8 @@ Default models (paper): LLM `GPT-4o-mini`, cross-encoder
 conda create -n gfmhybrid python=3.12 && conda activate gfmhybrid
 conda install cuda-toolkit -c nvidia/label/cuda-12.4.1
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-pip install -r ../requirements.txt
-pip install -e .            # install the gfmrag package (editable) — run inside gfm-rag/
+pip install -r requirements.txt
+pip install -e .            # install the gfmrag package (editable)
 ```
 
 Create `.env` inside `gfm-rag/` (do NOT commit):
@@ -173,7 +173,7 @@ cd gfmrag/workflow && streamlit run app.py
 
 ```bash
 export OPENAI_API_KEY="sk-..."
-python ../LLM_as_a_judge.py --input prediction.jsonl --output evaluated.jsonl --workers 5
+python LLM_as_a_judge.py --input prediction.jsonl --output evaluated.jsonl --workers 5
 ```
 Each line in `prediction.jsonl`: `id`, `question`, `answer` (reference), `response`.
 
