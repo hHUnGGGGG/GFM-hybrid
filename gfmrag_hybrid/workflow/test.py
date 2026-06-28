@@ -25,33 +25,9 @@ _STRIP_SUFFIXES = [
 ]
 
 
-def normalize_entity(entity: str) -> str:
-    e = entity.strip()
-    e = re.sub(r'^\[(.+)\]$', r'\1', e).strip()
-    for prefix in _STRIP_PREFIXES:
-        if e.lower().startswith(prefix):
-            e = e[len(prefix):].strip()
-            break
-    words = e.split()
-    while words and words[-1].lower() in _STRIP_SUFFIXES:
-        words.pop()
-    e = " ".join(words).strip()
-    used_in_match = re.match(r'^.+?\s+used\s+in\s+(.+)$', e, re.IGNORECASE)
-    if used_in_match:
-        e = used_in_match.group(1).strip()
-    return e if e else entity.strip()
-
-
-def normalize_entities(entities: list) -> list:
-    seen = set()
-    result = []
-    for raw in entities:
-        cleaned = normalize_entity(str(raw))
-        key = cleaned.lower()
-        if key not in seen and cleaned:
-            seen.add(key)
-            result.append(cleaned)
-    return result
+from gfmrag_hybrid.bm25 import (
+    normalize_entities,
+)
 
 
 def sync_time():

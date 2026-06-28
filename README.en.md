@@ -40,7 +40,7 @@ repeated lookups), and **previous sub-questions**. Each step runs a retrieval ph
 
 1. **Graph-Foundation Retriever with Entity Scores** — returns *both* ranked
    documents *and* the min–max-normalised tensor $\tilde{P}_q$; chunks are scored
-   with RRF ($k=60$). → `gfmrag_hybrid/gfmrag_retriever_with_entity_scores.py`
+   with RRF ($k=60$). → `gfmrag_hybrid/gfm/retriever_with_entity_scores.py`
 2. **Entity-Augmented BM25 Retrieval** — concatenates seed entities + high-scoring
    graph entities ($\tilde{P}_q \ge \theta=0.10$) + the sub-question into **one**
    BM25 query. → `gfmrag_hybrid/workflow/core_engine.py` (`BM25Searcher`)
@@ -69,7 +69,8 @@ chunk grouping + KG building) — see `gfmrag_hybrid/workflow/stage0_split_docum
 
 ```
 gfmrag_hybrid/
-├── gfmrag_retriever_with_entity_scores.py     # Component 1 (GFM + entity scores)
+├── gfm/
+│   └── retriever_with_entity_scores.py        # Component 1 (GFM + entity scores)
 ├── chunkers/document_chunker.py               # SemanticChunker (splitting)
 ├── kg_construction/chunk_grouper.py           # Chunk grouping (stage1)
 ├── utils/text_tokenize.py                     # vi/en tokenisation
@@ -117,10 +118,9 @@ OPENAI_API_KEY=sk-...
 HF_TOKEN=hf_...
 ```
 
-> ⚠️ **Security:** revoke any keys previously leaked in the repo; use environment
-> variables only.
-
 ## 6. Data
+
+**Data link:** [Google Drive](https://drive.google.com/file/d/1ILAAFH2UpWpyD9WC1A2eFbjddus2eQ0V/view?usp=drive_link)
 
 Place raw data under `data/<data_name>/raw/`:
 - `dataset_corpus.json` — `{ "doc_title": "content..." }`

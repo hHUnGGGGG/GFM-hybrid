@@ -2,11 +2,6 @@
 
 **Entity-Score-Guided Hybrid Retrieval with Iterative Chain-of-Thought Reasoning for Multi-Hop and Medical Question Answering**
 
-> 🌐 **Ngôn ngữ:** **Tiếng Việt** | [English](README.en.md)
->
-> Nguyen Minh Hung¹, Lê Văn Thành² — ¹School of Information and Communication
-> Technology, Hanoi University of Science and Technology (HUST).
-
 Đây là **gói mã nguồn (`gfmrag_hybrid`)** của GFM-Hybrid — một pipeline **truy hồi + suy
 luận hợp nhất** cho hỏi đáp đa bước (multi-hop) và hỏi đáp y tế. Ý tưởng cốt lõi:
 một **Graph Foundation Model (GFM-RAG)** khi suy luận trên đồ thị tri thức sinh ra
@@ -44,7 +39,7 @@ Mỗi bước gồm pha truy hồi (đồ thị + BM25 theo thực thể) và ph
 
 1. **Graph-Foundation Retriever with Entity Scores** — trả về *cả* tài liệu xếp
    hạng *và* tensor $\tilde{P}_q$ (chuẩn hóa min–max); chunk chấm bằng RRF ($k=60$).
-   → `gfmrag_hybrid/gfmrag_retriever_with_entity_scores.py`
+   → `gfmrag_hybrid/gfm/retriever_with_entity_scores.py`
 2. **Entity-Augmented BM25 Retrieval** — ghép seed entities + thực thể đồ thị điểm
    cao ($\tilde{P}_q \ge \theta=0.10$) + sub-question thành **một** câu BM25.
    → `gfmrag_hybrid/workflow/core_engine.py` (`BM25Searcher`)
@@ -71,7 +66,8 @@ ngữ vi/en) và **Stage 1** (tùy chọn gom cụm chunk + xây KG) — xem
 
 ```
 gfmrag_hybrid/
-├── gfmrag_retriever_with_entity_scores.py     # Component 1 (GFM + entity scores)
+├── gfm/
+│   └── retriever_with_entity_scores.py        # Component 1 (GFM + entity scores)
 ├── chunkers/document_chunker.py               # SemanticChunker (tách chunk)
 ├── kg_construction/chunk_grouper.py           # Gom cụm chunk (stage1)
 ├── utils/text_tokenize.py                     # Tách từ vi/en
@@ -119,9 +115,9 @@ OPENAI_API_KEY=sk-...
 HF_TOKEN=hf_...
 ```
 
-> ⚠️ **Bảo mật:** revoke mọi khóa cũ từng bị lộ trong repo; chỉ dùng biến môi trường.
-
 ## 6. Dữ liệu
+
+**Link data:** [Google Drive](https://drive.google.com/file/d/1ILAAFH2UpWpyD9WC1A2eFbjddus2eQ0V/view?usp=drive_link)
 
 Đặt dữ liệu thô tại `data/<data_name>/raw/`:
 - `dataset_corpus.json` — `{ "tên_tài_liệu": "nội dung..." }`

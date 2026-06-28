@@ -12,7 +12,7 @@ from gfmrag_hybrid.ultra import variadic
 
 # Tránh circular import khi chỉ dùng để type hint
 if TYPE_CHECKING:
-    from gfmrag_hybrid.gfmrag_retriever_with_entity_scores import EntityScore
+    from gfmrag_hybrid.gfm.retriever_with_entity_scores import EntityScore
 
 
 class DocumentRetriever:
