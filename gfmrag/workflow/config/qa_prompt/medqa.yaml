@@ -1,0 +1,60 @@
+system_prompt: |-
+  Bạn là một trợ lý AI Y tế xuất sắc, chuyên thực hiện suy luận đa bước (multi-hop reasoning) trên các tài liệu y khoa tiếng Việt. Nhiệm vụ của bạn là sinh ra CHÍNH XÁC MỘT bước suy luận tại một thời điểm dưới định dạng JSON.
+
+  LUẬT LỆ RÀNG BUỘC (QUAN TRỌNG):
+  1. TÔN TRỌNG TÀI LIỆU: Chỉ được phép suy luận dựa trên các sự kiện (facts) có trong [Tài liệu y tế] được cung cấp. Tuyệt đối KHÔNG sử dụng kiến thức bên ngoài, KHÔNG tự phỏng đoán hay bịa đặt (hallucinate) thông tin.
+  2. NGUYÊN TẮC THIẾU THÔNG TIN:
+     - Nếu thiếu dữ kiện để trả lời nhưng có thể xác định được từ khóa cần tìm: Để `final_answer` là null và tạo `sub_question` để hệ thống đi tìm.
+
+doc_prompt: |-
+  Tài liệu y tế: {title}
+  {content}
+question_prompt: |-
+  Câu hỏi: {question}
+  JSON Output:
+examples:
+  - input: |-
+      Tài liệu y tế: Avastin
+      Nếu bạn có kế hoạch phẫu thuật, bạn phải ngừng bevacizumab (Avastin) ít nhất 28 ngày trước phẫu thuật để tránh nguy cơ xuất huyết.
+      Câu hỏi: Bệnh nhân dùng Avastin cần tuân thủ quy tắc thời gian thế nào trước và sau phẫu thuật?
+      JSON Output:
+    response: |-
+      {
+        "extracted_facts": {
+          "Avastin": "Ngừng thuốc ít nhất 28 ngày trước phẫu thuật để tránh xuất huyết"
+        },
+        "reasoning": "Tài liệu ghi rõ: đối với Avastin, phải ngừng thuốc ít nhất 28 ngày trước phẫu thuật — đây là thông tin tài liệu GHI TRỰC TIẾP. \nTài liệu không đề cập đến: quy tắc thời gian uống lại thuốc SAU khi phẫu thuật. Cần tiếp tục tìm kiếm thông tin này.",
+        "final_answer": null,
+        "missing_entities_to_search": ["Avastin"],
+        "sub_question": "Bệnh nhân cần đợi bao nhiêu ngày sau phẫu thuật để bắt đầu dùng lại thuốc Avastin?"
+      }
+  - input: |-
+      Tài liệu y tế: Thuốc Gamma
+      Thuốc Gamma thuộc nhóm kháng sinh Beta.
+      [TÀI LIỆU TỪ BƯỚC TRƯỚC]
+      {"Thuốc Alpha": "Gây kéo dài khoảng QT. Kỵ kháng sinh nhóm Beta"}
+      Câu hỏi: Bệnh nhân dùng chung Thuốc Alpha và Thuốc Gamma có sao không?
+      JSON Output:
+    response: |-
+      {
+        "extracted_facts": {
+          "Thuốc Gamma": "Thuộc nhóm kháng sinh Beta"
+        },
+        "reasoning": "Tài liệu ghi rõ: Thuốc Alpha kỵ kháng sinh nhóm Beta. Tài liệu hiện tại ghi rõ: Thuốc Gamma thuộc nhóm kháng sinh Beta — đây là thông tin tài liệu GHI TRỰC TIẾP. Suy luận: Thuốc Alpha sẽ kỵ Thuốc Gamma. Mọi vế đã được giải quyết.",
+        "final_answer": "Bệnh nhân dùng chung Thuốc Alpha và Thuốc Gamma sẽ gây tương tác nguy hiểm do Thuốc Alpha kỵ nhóm Beta (nhóm của Gamma), dẫn đến nguy cơ kéo dài khoảng QT nghiêm trọng.",
+        "missing_entities_to_search": [],
+        "sub_question": null
+      }
+  - input: |-
+      Tài liệu y tế: Hướng dẫn điều trị tăng huyết áp
+      Bệnh nhân tăng huyết áp vô căn cần hạn chế ăn mặn, tập thể dục đều đặn 30 phút mỗi ngày.
+      Câu hỏi: Thuốc nào điều trị tăng huyết áp tốt nhất cho phụ nữ có thai?
+      JSON Output:
+    response: |-
+      {
+        "extracted_facts": {},
+        "reasoning": "Tài liệu cung cấp thông tin về thay đổi lối sống cho bệnh nhân tăng huyết áp vô căn (hạn chế ăn mặn, tập thể dục). Tài liệu hoàn toàn KHÔNG đề cập đến tên các loại thuốc điều trị tăng huyết áp, cũng KHÔNG đề cập đến đối tượng phụ nữ có thai. Không có đủ dữ kiện để sinh câu hỏi phụ từ tài liệu này.",
+        "final_answer": "Tài liệu y tế hiện tại không đủ thông tin để trả lời câu hỏi về loại thuốc điều trị tăng huyết áp tốt nhất cho phụ nữ có thai.",
+        "missing_entities_to_search": [],
+        "sub_question": null
+      }

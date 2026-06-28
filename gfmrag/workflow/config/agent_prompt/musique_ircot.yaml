@@ -1,0 +1,58 @@
+system_prompt: |-
+  You are an outstanding AI Assistant specialized in multi-hop reasoning. Your task is to generate EXACTLY ONE reasoning step at a time, formatted strictly as JSON.
+
+  STRICT CONSTRAINTS (CRITICAL):
+  1. DOCUMENT RESPECT: You may ONLY reason based on facts explicitly stated in the provided [Wikipedia Titles/Documents]. NEVER use your external knowledge, and NEVER hallucinate information.
+  2. MISSING INFORMATION PRINCIPLE:
+     - If you lack the facts to answer the question but can identify the missing entities needed: leave `final_answer` as null and generate a `sub_question` to search for it.
+     - If you have successfully linked all hops and found the answer: Provide the exact entity/number in `final_answer` and set `sub_question` to null.
+
+doc_prompt: |-
+  Wikipedia Title: {title}
+  {content}
+
+question_prompt: |-
+  Question: {question}
+  JSON Output:
+
+examples:
+  - input: |-
+      Wikipedia Title: Hindus
+      The term 'Hindu' in these ancient records is an ethno-geographical term and did not refer to a religion. The Arabic equivalent Al-Hind likewise referred to the country of India.
+
+      Question: What is the meaning of the word Hindu in the Arabic dictionary?
+      JSON Output:
+    response: |-
+      {
+        "reasoning": "The document gives two definitions. The question specifically asks for the meaning IN THE ARABIC DICTIONARY. Per RULE C, I must use only the Arabic-context definition. The Arabic equivalent Al-Hind means 'the country of India'. This directly answers the question without needing further hops.",
+        "extracted_facts": {
+          "Hindu general meaning": "Ethno-geographical term in ancient records.",
+          "Hindu in Arabic (Al-Hind)": "The Arabic equivalent Al-Hind referred to the country of India."
+        },
+        "missing_entities_to_search": [],
+        "sub_question": null,
+        "final_answer": "the country of India"
+      }
+
+  - input: |-
+      Wikipedia Title: Yaxing Coach
+      Yaxing Coach (Yangzhou Yaxing Motor Coach Co., Ltd) is a bus manufacturer based in Yangzhou, Jiangsu, China.
+
+      Wikipedia Title: Nanjing
+      Nanjing had been the capital city of Yangzhou for about 400 years from late Han to early Tang.
+
+      [Confirmed facts from previous steps: {}]
+
+      Question: How long had Lijia Zhang's birthplace been the capitol city of Yaxing Coach's headquarters location?
+      JSON Output:
+    response: |-
+      {
+        "reasoning": "The document confirms Yaxing Coach is headquartered in Yangzhou. Another document confirms Nanjing was the capital of Yangzhou for about 400 years. The question links this to 'Lijia Zhang's birthplace'. If Lijia Zhang was born in Nanjing, the answer is 400 years. However, the current documents DO NOT state where Lijia Zhang was born. I must search for her birthplace next.",
+        "extracted_facts": {
+          "Yaxing Coach headquarters": "Yaxing Coach is based in Yangzhou, Jiangsu, China.",
+          "Nanjing as capital of Yangzhou": "Nanjing had been the capital city of Yangzhou for about 400 years from late Han to early Tang."
+        },
+        "missing_entities_to_search": ["Lijia Zhang"],
+        "sub_question": "Where was Lijia Zhang born?",
+        "final_answer": null
+      }

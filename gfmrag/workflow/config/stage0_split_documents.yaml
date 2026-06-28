@@ -1,0 +1,18 @@
+run:
+  dir: outputs/stage0_split_documents
+
+dataset:
+  root: E:\arag\gfm-rag\data
+  data_name: vietnamese_medical
+
+# Ngôn ngữ corpus: vi | en (chi phối tách từ + embedding mặc định của chunker)
+language: vi
+
+splitter:
+  # model_name để trống -> tự chọn theo language
+  #   vi -> dangvantuan/vietnamese-embedding ; en -> BAAI/bge-large-en
+  model_name: null
+  device: null        # null -> auto (cuda nếu có, không thì cpu)
+  chunk_size: 500     # giữ để tương thích cấu hình cũ (SemanticChunker tự quyết độ dài)
+  overlap: 50
+  backup: true        # backup *.bak trước khi ghi đè

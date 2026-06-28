@@ -1,0 +1,7 @@
+_target_: gfmrag.kg_construction.entity_linking_model.PhoBertELModel
+model_name: vinai/phobert-base
+root: tmp
+use_cache: true
+normalize: true
+batch_size: 32
+force: false

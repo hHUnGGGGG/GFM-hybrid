@@ -1,0 +1,9 @@
+_target_: gfmrag.kg_construction.entity_linking_model.DPRELModel
+model_name: BAAI/bge-large-en-v1.5
+use_cache: True
+normalize: True
+batch_size: 1
+sim_batch_size: 8
+chunk_size: 5
+query_instruct: "query: "
+passage_instruct: "passage: "

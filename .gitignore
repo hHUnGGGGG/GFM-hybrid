@@ -1,0 +1,36 @@
+# --- Dữ liệu & output (KHÔNG push) ---
+data/
+data_full
+outputs
+tmp
+logs/
+
+# --- Model / checkpoint / cache (tải lại được, KHÔNG push) ---
+gfm_model/
+model_cache/
+model_custom/
+checkpoints/
+saved_models/
+*.pth
+*.pt
+*.zip
+
+# --- Bí mật ---
+.env
+*.bak
+
+# --- Python ---
+*.pyc
+__pycache__/
+*.egg-info/
+.ipynb_checkpoints/
+*.ipynb
+
+# --- Build / docs site ---
+dist/*
+site/
+
+# --- IDE / OS ---
+.vscode
+.idea/
+.DS_Store
