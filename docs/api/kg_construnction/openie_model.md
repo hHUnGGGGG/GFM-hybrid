@@ -1,1 +1,1 @@
-::: gfmrag.kg_construction.openie_model
+::: gfmrag_hybrid.kg_construction.openie_model

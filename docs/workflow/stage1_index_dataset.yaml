@@ -11,20 +11,20 @@ defaults:
   - el_model: multilingual_dpr
 
 ner_model:
-  _target_: gfmrag.kg_construction.ner_model.LLMNERModel
+  _target_: gfmrag_hybrid.kg_construction.ner_model.LLMNERModel
   llm_api: openai
   model_name: gpt-4o-mini
   max_tokens: 1024
 
 openie_model:
-  _target_: gfmrag.kg_construction.openie_model.LLMOPENIEModel
+  _target_: gfmrag_hybrid.kg_construction.openie_model.LLMOPENIEModel
   llm_api: openai
   model_name: gpt-4o-mini
   max_ner_tokens: 1024
   max_triples_tokens: 4096
 
 el_model:
-  _target_: gfmrag.kg_construction.entity_linking_model.DPRELModel
+  _target_: gfmrag_hybrid.kg_construction.entity_linking_model.DPRELModel
   model_name: intfloat/multilingual-e5-base
   root: tmp
   use_cache: true
@@ -32,7 +32,7 @@ el_model:
   batch_size: 32
 
 kg_constructor:
-  _target_: gfmrag.kg_construction.KGConstructor
+  _target_: gfmrag_hybrid.kg_construction.KGConstructor
   root: tmp/kg_construction
   num_processes: 4
   cosine_sim_edges: true
@@ -45,7 +45,7 @@ kg_constructor:
   el_model: ${el_model}
 
 qa_constructor:
-  _target_: gfmrag.kg_construction.QAConstructor
+  _target_: gfmrag_hybrid.kg_construction.QAConstructor
   root: tmp/qa_construction
   num_processes: 4
   force: false

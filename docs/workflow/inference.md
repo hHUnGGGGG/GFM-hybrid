@@ -1,4 +1,4 @@
-GFM-RAG can be directly used for retrieval on a given dataset without fine-tuning. We provide an easy-to-use [GFMRetriever][gfmrag.GFMRetriever] interface for inference.
+GFM-RAG can be directly used for retrieval on a given dataset without fine-tuning. We provide an easy-to-use [GFMRetriever][gfmrag_hybrid.GFMRetriever] interface for inference.
 
 !!! NOTE
     We have already released the [pre-trained model](https://huggingface.co/rmanluo/GFM-RAG-8M), which can be used directly for retrieval. The model will be automatically downloaded by specifying it in the configuration.
@@ -11,10 +11,10 @@ GFM-RAG can be directly used for retrieval on a given dataset without fine-tunin
 
 You need to create a configuration file for inference.
 
-??? example "gfmrag/workflow/config/stage3_qa_ircot_inference.yaml"
+??? example "gfmrag_hybrid/workflow/config/stage3_qa_ircot_inference.yaml"
 
-    ```yaml title="gfmrag/workflow/config/stage3_qa_ircot_inference.yaml"
-    --8<-- "gfmrag/workflow/config/stage3_qa_ircot_inference.yaml"
+    ```yaml title="gfmrag_hybrid/workflow/config/stage3_qa_ircot_inference.yaml"
+    --8<-- "gfmrag_hybrid/workflow/config/stage3_qa_ircot_inference.yaml"
     ```
 
 Details of the configuration parameters are explained in the [GFM-RAG Configuration][gfm-rag-configuration] page.
@@ -31,7 +31,7 @@ import hydra
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf
 
-from gfmrag import GFMRetriever
+from gfmrag_hybrid import GFMRetriever
 
 logger = logging.getLogger(__name__)
 
@@ -59,8 +59,8 @@ docs = retriever.retrieve("Who is the president of France?", top_k=5)
 
 ```python
 from hydra.utils import instantiate
-from gfmrag.llms import BaseLanguageModel
-from gfmrag.prompt_builder import QAPromptBuilder
+from gfmrag_hybrid.llms import BaseLanguageModel
+from gfmrag_hybrid.prompt_builder import QAPromptBuilder
 
 llm = instantiate(cfg.llm)
 qa_prompt_builder = QAPromptBuilder(cfg.qa_prompt)
@@ -74,49 +74,49 @@ You can also integrate the GFM-RAG with arbitrary reasoning agents to perform mu
 
 You can run the following command to perform multi-step reasoning:
 
-??? example "gfmrag/workflow/stage3_qa_ircot_inference.py"
+??? example "gfmrag_hybrid/workflow/stage3_qa_ircot_inference.py"
 
     <!-- blacken-docs:off -->
-    ```python title="gfmrag/workflow/stage3_qa_ircot_inference.py"
-    --8<-- "gfmrag/workflow/stage3_qa_ircot_inference.py"
+    ```python title="gfmrag_hybrid/workflow/stage3_qa_ircot_inference.py"
+    --8<-- "gfmrag_hybrid/workflow/stage3_qa_ircot_inference.py"
     ```
     <!-- blacken-docs:on -->
 
 ```bash
-python -m gfmrag.workflow.stage3_qa_ircot_inference
+python -m gfmrag_hybrid.workflow.stage3_qa_ircot_inference
 ```
 
 You can overwrite the configuration like this:
 
 ```bash
-python -m gfmrag.workflow.stage3_qa_ircot_inference test.max_steps=3
+python -m gfmrag_hybrid.workflow.stage3_qa_ircot_inference test.max_steps=3
 ```
 
 ## Batch Retrieval
 You can also perform batch retrieval with GFM-RAG with multi GPUs supports by running the following command:
 
-??? example "gfmrag/workflow/config/stage3_qa_inference.yaml"
+??? example "gfmrag_hybrid/workflow/config/stage3_qa_inference.yaml"
 
-    ```yaml title="gfmrag/workflow/config/stage3_qa_inference.yaml"
-    --8<-- "gfmrag/workflow/config/stage3_qa_inference.yaml"
+    ```yaml title="gfmrag_hybrid/workflow/config/stage3_qa_inference.yaml"
+    --8<-- "gfmrag_hybrid/workflow/config/stage3_qa_inference.yaml"
     ```
 
-??? example "gfmrag/workflow/stage3_qa_inference.py"
+??? example "gfmrag_hybrid/workflow/stage3_qa_inference.py"
 
     <!-- blacken-docs:off -->
-    ```python title="gfmrag/workflow/stage3_qa_inference.py"
-    --8<-- "gfmrag/workflow/stage3_qa_inference.py"
+    ```python title="gfmrag_hybrid/workflow/stage3_qa_inference.py"
+    --8<-- "gfmrag_hybrid/workflow/stage3_qa_inference.py"
     ```
     <!-- blacken-docs:on -->
 
 ```bash
-python -m gfmrag.workflow.stage3_qa_inference
+python -m gfmrag_hybrid.workflow.stage3_qa_inference
 # Multi-GPU retrieval
-torchrun --nproc_per_node=4 -m gfmrag.workflow.stage3_qa_inference
+torchrun --nproc_per_node=4 -m gfmrag_hybrid.workflow.stage3_qa_inference
 ```
 
 You can overwrite the configuration like this:
 
 ```bash
-python -m gfmrag.workflow.stage3_qa_inference test.retrieval_batch_size=4
+python -m gfmrag_hybrid.workflow.stage3_qa_inference test.retrieval_batch_size=4
 ```

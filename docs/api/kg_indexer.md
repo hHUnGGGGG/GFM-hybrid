@@ -1,1 +1,1 @@
-::: gfmrag.KGIndexer
+::: gfmrag_hybrid.KGIndexer

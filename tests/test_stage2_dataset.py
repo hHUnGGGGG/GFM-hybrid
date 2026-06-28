@@ -1,5 +1,5 @@
-from gfmrag.datasets.kg_dataset import KGDataset
-from gfmrag.datasets.qa_dataset import QADataset
+from gfmrag_hybrid.datasets.kg_dataset import KGDataset
+from gfmrag_hybrid.datasets.qa_dataset import QADataset
 
 
 def test_kg_dataset() -> None:

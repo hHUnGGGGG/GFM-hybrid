@@ -1,1 +1,1 @@
-::: gfmrag.prompt_builder
+::: gfmrag_hybrid.prompt_builder

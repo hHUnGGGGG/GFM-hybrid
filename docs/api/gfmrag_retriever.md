@@ -1,1 +1,1 @@
-::: gfmrag.GFMRetriever
+::: gfmrag_hybrid.GFMRetriever

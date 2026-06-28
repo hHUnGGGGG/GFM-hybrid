@@ -1,1 +1,1 @@
-::: gfmrag.doc_rankers
+::: gfmrag_hybrid.doc_rankers
