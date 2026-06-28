@@ -1,1 +1,1 @@
-::: gfmrag.losses
+::: gfmrag_hybrid.losses

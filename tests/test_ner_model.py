@@ -5,7 +5,7 @@
 
     cfg = OmegaConf.create(
         {
-            "_target_": "gfmrag.kg_construction.ner_model.LLMNERModelVietnamese",
+            "_target_": "gfmrag_hybrid.kg_construction.ner_model.LLMNERModelVietnamese",
             "llm_api": "openai",
             "model_name": "gpt-4o-mini",
         }

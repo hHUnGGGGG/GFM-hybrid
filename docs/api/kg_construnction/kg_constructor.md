@@ -1,4 +1,4 @@
-::: gfmrag.kg_construction.BaseKGConstructor
+::: gfmrag_hybrid.kg_construction.BaseKGConstructor
 
 
-::: gfmrag.kg_construction.KGConstructor
+::: gfmrag_hybrid.kg_construction.KGConstructor

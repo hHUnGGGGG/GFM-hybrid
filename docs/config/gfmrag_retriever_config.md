@@ -3,8 +3,8 @@ An example configuration file for GFM-RAG is shown below:
 
 !!! example
 
-    ```yaml title="gfmrag/workflow/config/stage3_qa_ircot_inference.yaml"
-    --8<-- "gfmrag/workflow/config/stage3_qa_ircot_inference.yaml"
+    ```yaml title="gfmrag_hybrid/workflow/config/stage3_qa_ircot_inference.yaml"
+    --8<-- "gfmrag_hybrid/workflow/config/stage3_qa_ircot_inference.yaml"
     ```
 
 ## General Configuration
@@ -20,9 +20,9 @@ An example configuration file for GFM-RAG is shown below:
 |  `ner_model`   |  None   |                  The config of the [ner_model](ner_model_config.md)                   |
 |   `el_model`   |  None   |                   The config of the [el_model](el_model_config.md)                    |
 |  `doc_ranker`  |  None   |                 The config of the [doc_ranker](doc_ranker_config.md)                  |
-| `qa_evaluator` |  None   |                  The config of the [qa_evaluator][gfmrag.evaluation]                  |
-| `agent_prompt` |  None   | The config of the [PromptBuilder][gfmrag.prompt_builder] used for IRCOT |
-|  `qa_prompt`   |  None   |        The config of the [PromptBuilder][gfmrag.prompt_builder]         |
+| `qa_evaluator` |  None   |                  The config of the [qa_evaluator][gfmrag_hybrid.evaluation]                  |
+| `agent_prompt` |  None   | The config of the [PromptBuilder][gfmrag_hybrid.prompt_builder] used for IRCOT |
+|  `qa_prompt`   |  None   |        The config of the [PromptBuilder][gfmrag_hybrid.prompt_builder]         |
 
 
 ## Dataset
@@ -37,21 +37,21 @@ An example configuration file for GFM-RAG is shown below:
 
 |       Parameter       | Options |                           Note                           |
 | :-------------------: | :-----: | :------------------------------------------------------: |
-|      `_target_`       |  None   |         The [language model][gfmrag.llms] to use         |
+|      `_target_`       |  None   |         The [language model][gfmrag_hybrid.llms] to use         |
 | `model_name_or_path`  |  None   |                  The model name or path                  |
-| Additional parameters |  None   | Parameters to initialize a [language model][gfmrag.llms] |
+| Additional parameters |  None   | Parameters to initialize a [language model][gfmrag_hybrid.llms] |
 
-Please refer to the [LLMs][gfmrag.llms] page for more details.
+Please refer to the [LLMs][gfmrag_hybrid.llms] page for more details.
 
 ## Graph Retriever
 
 |       Parameter        |    Options     |                                Note                                |
 | :--------------------: | :------------: | :----------------------------------------------------------------: |
-|       `_target_`       |      None      |        The [graph retriever][gfmrag.GFMRetriever] to use        |
+|       `_target_`       |      None      |        The [graph retriever][gfmrag_hybrid.GFMRetriever] to use        |
 |      `model_path`      |      None      |          Checkpoint path of the pre-trained GFM-RAG model          |
-|      `doc_ranker`      |      None      |          The [document ranker][gfmrag.doc_rankers] to use          |
-|      `ner_model`       |      None      |      The [NER model][gfmrag.kg_construction.ner_model] to use      |
-|       `el_model`       |      None      | The [EL model][gfmrag.kg_construction.entity_linking_model] to use |
+|      `doc_ranker`      |      None      |          The [document ranker][gfmrag_hybrid.doc_rankers] to use          |
+|      `ner_model`       |      None      |      The [NER model][gfmrag_hybrid.kg_construction.ner_model] to use      |
+|       `el_model`       |      None      | The [EL model][gfmrag_hybrid.kg_construction.entity_linking_model] to use |
 |     `qa_evaluator`     |      None      |                      The QA evaluator to use                       |
 | `init_entities_weight` | `True`,`False` |             Whether to initialize the entities weight              |
 

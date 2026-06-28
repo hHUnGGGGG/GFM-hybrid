@@ -1,0 +1,39 @@
+hydra:
+  run:
+    dir: outputs/qa_agent_inference/${dataset.data_name}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+
+defaults:
+  - _self_
+  - text_emb_model: multi5
+  - doc_ranker: idf_topk_ranker
+  - agent_prompt: hotpotqa_ircot
+  - qa_prompt: hotpotqa
+  - ner_model: llm_ner_model_vietnamese
+  - el_model: dpr_el_model
+  - qa_evaluator: hotpotqa
+
+seed: 1024
+
+dataset:
+  root: E:\arag\gfm-rag\data
+  data_name: vietnamese_medical
+
+llm:
+  _target_: gfmrag_hybrid.llms.ChatGPT
+  model_name_or_path: gpt-4o-mini
+  retry: 5
+
+graph_retriever:
+  model_path: rmanluo/GFM-RAG-8M
+  doc_ranker: ${doc_ranker}
+  ner_model: ${ner_model}
+  el_model: ${el_model}
+  qa_evaluator: ${qa_evaluator}
+  init_entities_weight: True
+
+test:
+  top_k: 5  # Giảm từ 10 để tiết kiệm memory
+  max_steps: 1  # Giảm từ 2 để tránh crash
+  max_test_samples: 1
+  retrieval_batch_size: 1  # Thêm dòng này
+  resume: null

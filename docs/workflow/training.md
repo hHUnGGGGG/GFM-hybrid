@@ -70,10 +70,10 @@ An example of the training data:
 
 You need to create a configuration file for fine-tuning.
 
-??? example "gfmrag/workflow/config/stage2_qa_finetune.yaml"
+??? example "gfmrag_hybrid/workflow/config/stage2_qa_finetune.yaml"
 
-    ```yaml title="gfmrag/workflow/config/stage2_qa_finetune.yaml"
-    --8<-- "gfmrag/workflow/config/stage2_qa_finetune.yaml"
+    ```yaml title="gfmrag_hybrid/workflow/config/stage2_qa_finetune.yaml"
+    --8<-- "gfmrag_hybrid/workflow/config/stage2_qa_finetune.yaml"
     ```
 
 Details of the configuration parameters are explained in the [GFM-RAG Fine-tuning Configuration][gfm-rag-fine-tuning-configuration] page.
@@ -81,26 +81,26 @@ Details of the configuration parameters are explained in the [GFM-RAG Fine-tunin
 
 You can fine-tune the pre-trained GFM-RAG model on your dataset using the following command:
 
-??? example "gfmrag/workflow/stage2_qa_finetune.py"
+??? example "gfmrag_hybrid/workflow/stage2_qa_finetune.py"
 
 	<!-- blacken-docs:off -->
-    ```python title="gfmrag/workflow/stage2_qa_finetune.py"
-    --8<-- "gfmrag/workflow/stage2_qa_finetune.py"
+    ```python title="gfmrag_hybrid/workflow/stage2_qa_finetune.py"
+    --8<-- "gfmrag_hybrid/workflow/stage2_qa_finetune.py"
     ```
 	<!-- blacken-docs:on -->
 
 ```bash
-python -m gfmrag.workflow.stage2_qa_finetune
+python -m gfmrag_hybrid.workflow.stage2_qa_finetune
 # Multi-GPU training
-torchrun --nproc_per_node=4 gfmrag.workflow.stage2_qa_finetune
+torchrun --nproc_per_node=4 gfmrag_hybrid.workflow.stage2_qa_finetune
 # Multi-node Multi-GPU training
-torchrun --nproc_per_node=4 --nnodes=2 gfmrag.workflow.stage2_qa_finetune
+torchrun --nproc_per_node=4 --nnodes=2 gfmrag_hybrid.workflow.stage2_qa_finetune
 ```
 
 You can overwrite the configuration like this:
 
 ```bash
-python -m gfmrag.workflow.stage2_qa_finetune train.batch_size=4
+python -m gfmrag_hybrid.workflow.stage2_qa_finetune train.batch_size=4
 ```
 
 ## GFM Pre-training
@@ -123,34 +123,34 @@ fred gehrke,played for,cleveland   los angeles rams
 
 You need to create a configuration file for pre-training.
 
-??? example "gfmrag/workflow/config/stage2_kg_pretrain.yaml"
+??? example "gfmrag_hybrid/workflow/config/stage2_kg_pretrain.yaml"
 
-    ```yaml title="gfmrag/workflow/config/stage2_kg_pretrain.yaml"
-    --8<-- "gfmrag/workflow/config/stage2_kg_pretrain.yaml"
+    ```yaml title="gfmrag_hybrid/workflow/config/stage2_kg_pretrain.yaml"
+    --8<-- "gfmrag_hybrid/workflow/config/stage2_kg_pretrain.yaml"
     ```
 
 Details of the configuration parameters are explained in the [GFM-RAG Pre-training Config][gfm-rag-pre-training-configuration] page.
 
 You can pre-train the GFM-RAG model on your dataset using the following command:
 
-??? example "gfmrag/workflow/stage2_kg_pretrain.py"
+??? example "gfmrag_hybrid/workflow/stage2_kg_pretrain.py"
 
 	<!-- blacken-docs:off -->
-    ```python title="gfmrag/workflow/stage2_kg_pretrain.py"
-    --8<--"gfmrag/workflow/stage2_kg_pretrain.py"
+    ```python title="gfmrag_hybrid/workflow/stage2_kg_pretrain.py"
+    --8<--"gfmrag_hybrid/workflow/stage2_kg_pretrain.py"
     ```
 	<!-- blacken-docs:on -->
 
 ```bash
-python -m gfmrag.workflow.stage2_kg_pretrain
+python -m gfmrag_hybrid.workflow.stage2_kg_pretrain
 # Multi-GPU training
-torchrun --nproc_per_node=4 gfmrag.workflow.stage2_kg_pretrain
+torchrun --nproc_per_node=4 gfmrag_hybrid.workflow.stage2_kg_pretrain
 # Multi-node Multi-GPU training
-torchrun --nproc_per_node=4 --nnodes=2 gfmrag.workflow.stage2_kg_pretrain
+torchrun --nproc_per_node=4 --nnodes=2 gfmrag_hybrid.workflow.stage2_kg_pretrain
 ```
 
 You can overwrite the configuration like this:
 
 ```bash
-python -m gfmrag.workflow.stage2_kg_pretrain train.batch_size=4
+python -m gfmrag_hybrid.workflow.stage2_kg_pretrain train.batch_size=4
 ```

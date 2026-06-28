@@ -2,7 +2,7 @@
 
 **Entity-Score-Guided Hybrid Retrieval with Iterative Chain-of-Thought Reasoning for Multi-Hop and Medical Question Answering**
 
-This is the **source package (`gfmrag`)** of GFM-Hybrid — a **unified
+This is the **source package (`gfmrag_hybrid`)** of GFM-Hybrid — a **unified
 retrieval-and-reasoning pipeline** for multi-hop and medical question answering.
 Core idea: a **Graph Foundation Model (GFM-RAG)**, while reasoning over a knowledge
 graph, produces an **entity-relevance tensor** $P_q \in [0,1]^{|\mathcal{V}|}$.
@@ -40,10 +40,10 @@ repeated lookups), and **previous sub-questions**. Each step runs a retrieval ph
 
 1. **Graph-Foundation Retriever with Entity Scores** — returns *both* ranked
    documents *and* the min–max-normalised tensor $\tilde{P}_q$; chunks are scored
-   with RRF ($k=60$). → `gfmrag/gfmrag_retriever_with_entity_scores.py`
+   with RRF ($k=60$). → `gfmrag_hybrid/gfm/retriever_with_entity_scores.py`
 2. **Entity-Augmented BM25 Retrieval** — concatenates seed entities + high-scoring
    graph entities ($\tilde{P}_q \ge \theta=0.10$) + the sub-question into **one**
-   BM25 query. → `gfmrag/workflow/core_engine.py` (`BM25Searcher`)
+   BM25 query. → `gfmrag_hybrid/workflow/core_engine.py` (`BM25Searcher`)
 3. **Step-Local Global Chunk Pool** — merges both branches keeping their scores
    separate, **refreshed every step**. → `core_engine.py`
 4. **Cross-Encoder Reranking + IRCoT** — `BAAI/bge-reranker-v2-m3` (max-pooling) +
@@ -60,16 +60,17 @@ repeated lookups), and **previous sub-questions**. Each step runs a retrieval ph
 Documents are chunked (LLM/SemanticChunker) → NER + triple extraction →
 entity–document matrix → synonym merging. In this repo the offline stage is
 organised into **Stage 0** (splitter, bilingual vi/en) and **Stage 1** (optional
-chunk grouping + KG building) — see `gfmrag/workflow/stage0_split_documents.py` and
-`gfmrag/kg_construction/chunk_grouper.py`.
+chunk grouping + KG building) — see `gfmrag_hybrid/workflow/stage0_split_documents.py` and
+`gfmrag_hybrid/kg_construction/chunk_grouper.py`.
 
 ---
 
-## 3. Package layout (`gfmrag`)
+## 3. Package layout (`gfmrag_hybrid`)
 
 ```
-gfmrag/
-├── gfmrag_retriever_with_entity_scores.py     # Component 1 (GFM + entity scores)
+gfmrag_hybrid/
+├── gfm/
+│   └── retriever_with_entity_scores.py        # Component 1 (GFM + entity scores)
 ├── chunkers/document_chunker.py               # SemanticChunker (splitting)
 ├── kg_construction/chunk_grouper.py           # Chunk grouping (stage1)
 ├── utils/text_tokenize.py                     # vi/en tokenisation
@@ -107,7 +108,7 @@ conda create -n gfmhybrid python=3.12 && conda activate gfmhybrid
 conda install cuda-toolkit -c nvidia/label/cuda-12.4.1
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 pip install -r requirements.txt
-pip install -e .            # install the gfmrag package (editable)
+pip install -e .            # install the gfmrag_hybrid package (editable)
 ```
 
 Create `.env` inside `gfm-rag/` (do NOT commit):
@@ -117,10 +118,9 @@ OPENAI_API_KEY=sk-...
 HF_TOKEN=hf_...
 ```
 
-> ⚠️ **Security:** revoke any keys previously leaked in the repo; use environment
-> variables only.
-
 ## 6. Data
+
+**Data link:** [Google Drive](https://drive.google.com/file/d/1ILAAFH2UpWpyD9WC1A2eFbjddus2eQ0V/view?usp=drive_link)
 
 Place raw data under `data/<data_name>/raw/`:
 - `dataset_corpus.json` — `{ "doc_title": "content..." }`
@@ -137,24 +137,24 @@ Place raw data under `data/<data_name>/raw/`:
 
 ```bash
 # Stage 0 — split documents -> chunks (bilingual vi/en)
-python -m gfmrag.workflow.stage0_split_documents \
+python -m gfmrag_hybrid.workflow.stage0_split_documents \
     dataset.data_name=vietnamese_medical language=vi
 
 # Stage 1 — build KG-index (optionally enable chunk grouping)
-python -m gfmrag.workflow.stage1_index_dataset \
+python -m gfmrag_hybrid.workflow.stage1_index_dataset \
     dataset.data_name=vietnamese_medical language=vi \
     chunk_grouping.enabled=true chunk_grouping.granularity=chunk
 
 # Stage 2 — (optional) pre-train / fine-tune GFM
-python -m gfmrag.workflow.stage2_kg_pretrain
-python -m gfmrag.workflow.stage2_qa_finetune
+python -m gfmrag_hybrid.workflow.stage2_kg_pretrain
+python -m gfmrag_hybrid.workflow.stage2_qa_finetune
 
 # Stage 3 — IRCoT inference (GFM-Hybrid)
-python -m gfmrag.workflow.stage3_qa_ircot_inference_chunks_vietnamese_medical \
+python -m gfmrag_hybrid.workflow.stage3_qa_ircot_inference_chunks_vietnamese_medical \
     dataset.data_name=vietnamese_medical test.max_steps=3 test.top_k=5
 
 # Web chatbot
-cd gfmrag/workflow && streamlit run app.py
+cd gfmrag_hybrid/workflow && streamlit run app.py
 ```
 
 ## 8. Hyperparameters (from the paper)

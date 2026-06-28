@@ -4,7 +4,7 @@ def test_colbert_el_model() -> None:
 
     cfg = OmegaConf.create(
         {
-            "_target_": "gfmrag.kg_construction.entity_linking_model.ColbertELModel",
+            "_target_": "gfmrag_hybrid.kg_construction.entity_linking_model.ColbertELModel",
             "model_name_or_path": "colbert-ir/colbertv2.0",
             "root": "tmp",
             "force": False,
@@ -76,7 +76,7 @@ def test_dpr_el_model() -> None:
 
     cfg = OmegaConf.create(
         {
-            "_target_": "gfmrag.kg_construction.entity_linking_model.DPRELModel",
+            "_target_": "gfmrag_hybrid.kg_construction.entity_linking_model.DPRELModel",
             "model_name": "intfloat/multilingual-e5-base",  # đổi sang multilingual
             "root": "tmp",
             "use_cache": True,

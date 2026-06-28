@@ -4,8 +4,8 @@ An example of a KG-index configuration file is shown below:
 
 !!! example
 
-    ```yaml title="gfmrag/workflow/config/stage1_index_dataset.yaml"
-    --8<-- "gfmrag/workflow/config/stage1_index_dataset.yaml"
+    ```yaml title="gfmrag_hybrid/workflow/config/stage1_index_dataset.yaml"
+    --8<-- "gfmrag_hybrid/workflow/config/stage1_index_dataset.yaml"
     ```
 
 ## General Configuration
@@ -33,7 +33,7 @@ An example of a KG-index configuration file is shown below:
 
 |      Parameter      | Options |                                     Note                                      |
 | :-----------------: | :-----: | :---------------------------------------------------------------------------: |
-|     `_target_`      |  None   |      The class of [KGConstructor][gfmrag.kg_construction.KGConstructor]       |
+|     `_target_`      |  None   |      The class of [KGConstructor][gfmrag_hybrid.kg_construction.KGConstructor]       |
 |   `open_ie_model`   |  None   |           The config of the [openie_model](openie_model_config.md)            |
 |     `ner_model`     |  None   |              The config of the [ner_model](ner_model_config.md)               |
 |     `el_model`      |  None   |               The config of the [el_model](el_model_config.md)                |
@@ -46,18 +46,18 @@ An example of a KG-index configuration file is shown below:
 |       `force`       |  None   |                       Whether to force recompute the KG                       |
 
 
-Please refer to [KG Constructor][gfmrag.kg_construction.KGConstructor] for details of parameters.
+Please refer to [KG Constructor][gfmrag_hybrid.kg_construction.KGConstructor] for details of parameters.
 
 
 ## QA Constructor
 
 |    Parameter    | Options |                                     Note                                      |
 | :-------------: | :-----: | :---------------------------------------------------------------------------: |
-|   `_target_`    |  None   |      The class of [QAConstructor][gfmrag.kg_construction.QAConstructor]       |
+|   `_target_`    |  None   |      The class of [QAConstructor][gfmrag_hybrid.kg_construction.QAConstructor]       |
 |     `root`      |  None   | The temporary directory for storing intermediate files during QA construction |
 |   `ner_model`   |  None   |              The config of the [ner_model](ner_model_config.md)               |
 |   `el_model`    |  None   |               The config of the [el_model](el_model_config.md)                |
 | `num_processes` |  None   |                        The number of processes to use                         |
 |     `force`     |  None   |                    Whether to force recompute the QA data                     |
 
-Please refer to [QAConstructor][gfmrag.kg_construction.QAConstructor] for details of parameters.
+Please refer to [QAConstructor][gfmrag_hybrid.kg_construction.QAConstructor] for details of parameters.

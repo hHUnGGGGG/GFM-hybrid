@@ -1,8 +1,8 @@
-::: gfmrag.models
+::: gfmrag_hybrid.models
     options:
         heading_level: 1
 
 
-::: gfmrag.ultra.models.EntityNBFNet
+::: gfmrag_hybrid.ultra.models.EntityNBFNet
 
-::: gfmrag.ultra.models.QueryNBFNet
+::: gfmrag_hybrid.ultra.models.QueryNBFNet
