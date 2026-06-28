@@ -14,12 +14,9 @@ from hydra.core.global_hydra import GlobalHydra
 from hydra.utils import instantiate
 from sentence_transformers import CrossEncoder
 
-from core_engine import (
-    BM25Searcher,
-    agent_reasoning_with_reranker,
-    VIETNAMESE_STOPWORDS,
-)
-from gfmrag_hybrid.gfmrag_retriever_with_entity_scores import GFMRetrieverWithEntityScores
+from core_engine import agent_reasoning_with_reranker
+from gfmrag_hybrid.bm25 import BM25Searcher, VIETNAMESE_STOPWORDS
+from gfmrag_hybrid.gfm.retriever_with_entity_scores import GFMRetrieverWithEntityScores
 from gfmrag_hybrid.prompt_builder import QAPromptBuilder
 
 # ============================================================
@@ -133,7 +130,7 @@ st.markdown("""
 # ============================================================
 @st.cache_resource(show_spinner="⚙️ Đang khởi tạo AI Engine và Cơ sở dữ liệu Y khoa...")
 def load_system():
-    os.environ["OPENAI_API_KEY"] = "set_ur_api_key"
+    os.environ["OPENAI_API_KEY"] = "sk-BKvAG85L7hcOo5Co7tHq7UCIyTwhJbdE7awCcvEr4tpEl6Fx"
     if not GlobalHydra.instance().is_initialized():
         initialize(version_base=None, config_path="config")
     cfg = compose(config_name="stage3_qa_ircot_inference_chunks_vietnamese_medical")

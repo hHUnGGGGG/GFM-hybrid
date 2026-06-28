@@ -1,12 +1,12 @@
 """
-gfmrag_retriever_with_entity_scores.py
+gfmrag_hybrid/gfm/retriever_with_entity_scores.py
 
 Subclass của GFMRetriever, override retrieve() để expose entity scores
 ra ngoài trong quá trình inference.
 
 Usage (drop-in replacement):
     Thay:  from gfmrag_hybrid import GFMRetriever
-    Bằng:  from gfmrag_retriever_with_entity_scores import GFMRetrieverWithEntityScores as GFMRetriever
+    Bằng:  from gfmrag_hybrid.gfm import GFMRetrieverWithEntityScores as GFMRetriever
 """
 
 from __future__ import annotations
@@ -20,10 +20,9 @@ from typing import List, Tuple
 import torch
 from omegaconf import DictConfig
 
-from gfmrag_hybrid import GFMRetriever
+from gfmrag_hybrid.gfm.retriever import GFMRetriever, dedup_retrieved_docs
 from gfmrag_hybrid.ultra import query_utils
 from gfmrag_hybrid.utils.qa_utils import entities_to_mask
-from gfmrag_hybrid.gfmrag_retriever import dedup_retrieved_docs
 
 logger = logging.getLogger(__name__)
 

@@ -11,17 +11,15 @@ Yêu cầu:
 
 import re
 import json
-import string
 import logging
 import time
 from typing import List, Dict, Optional
 
-import numpy as np
-from rank_bm25 import BM25Okapi
 from omegaconf import DictConfig
 from sentence_transformers import CrossEncoder
 
-from gfmrag_hybrid.gfmrag_retriever_with_entity_scores import GFMRetrieverWithEntityScores
+from gfmrag_hybrid.bm25 import BM25Searcher, normalize_entities
+from gfmrag_hybrid.gfm.retriever_with_entity_scores import GFMRetrieverWithEntityScores
 from gfmrag_hybrid.llms import BaseLanguageModel
 from gfmrag_hybrid.prompt_builder import QAPromptBuilder
 from gfmrag_hybrid.utils.qa_utils import (
@@ -30,180 +28,6 @@ from gfmrag_hybrid.utils.qa_utils import (
 
 logger = logging.getLogger(__name__)
 
-# =========================================================================
-# STOPWORDS TIẾNG VIỆT
-# =========================================================================
-VIETNAMESE_STOPWORDS = {
-    "và", "là", "của", "có", "trong", "về", "cách", "nó", "thể", "hỗ", "trợ",
-    "trường", "hợp", "do", "quá", "liều", "các", "những", "cho", "để", "với",
-    "không", "khi", "được", "một", "này", "đó", "thuốc", "bệnh", "sự", "bị",
-    "ra", "vào", "tôi", "cần", "tìm", "thêm", "thông", "tin", "chi", "tiết",
-    "làm", "sao", "như", "thế", "nào", "thực", "thể", "thiếu", "tương", "tác"
-}
-
-# =========================================================================
-# CHUẨN HÓA THỰC THỂ
-# =========================================================================
-def normalize_entity(entity: str) -> str:
-    e = entity.strip()
-    e = re.sub(r'^\[(.+)\]$', r'\1', e).strip()
-    return e if e else entity.strip()
-
-def normalize_entities(entities: list) -> list:
-    seen = set()
-    result = []
-    for raw in entities:
-        cleaned = normalize_entity(str(raw))
-        key = cleaned.lower()
-        if key not in seen and cleaned:
-            seen.add(key)
-            result.append(cleaned)
-    return result
-
-# =========================================================================
-# BM25 SEARCHER — tối ưu batch numpy
-# =========================================================================
-class BM25Searcher:
-    def __init__(self, filepath: str, stopwords: set):
-        self.stopwords = stopwords
-        self.all_chunks: List[Dict] = []
-        self.bm25: Optional[BM25Okapi] = None
-
-        logger.info(f"Đang xây dựng BM25 index từ {filepath}...")
-        try:
-            with open(filepath, "r", encoding="utf-8") as f:
-                data = json.load(f)
-
-            if isinstance(data, dict):
-                for chunks in data.values():
-                    self.all_chunks.extend(chunks)
-            else:
-                self.all_chunks = data
-
-            if self.all_chunks:
-                corpus_tokens = [
-                    self._tokenize(chunk.get("document_title", "") + " " + chunk.get("text", ""))
-                    for chunk in self.all_chunks
-                ]
-                self.bm25 = BM25Okapi(corpus_tokens)
-                logger.info(f"BM25 index xây dựng thành công với {len(self.all_chunks)} chunks.")
-            else:
-                logger.warning("BM25 corpus rỗng.")
-        except Exception as e:
-            logger.error(f"Không thể xây dựng BM25 index: {e}")
-
-    def _tokenize(self, text: str) -> List[str]:
-        text = str(text).lower()
-        text = text.translate(str.maketrans("", "", string.punctuation))
-        return [w for w in text.split() if w not in self.stopwords and len(w) > 1]
-
-    def _batch_scores(self, token_list: List[List[str]]) -> np.ndarray:
-        if not token_list:
-            return np.empty((0, len(self.all_chunks)), dtype=np.float32)
-        return np.array(
-            [self.bm25.get_scores(tokens) for tokens in token_list],
-            dtype=np.float32,
-        )
-
-    def search_standard(self, query: str, top_k: int = 50) -> List[Dict]:
-        """Tìm kiếm BM25 tiêu chuẩn với một chuỗi query duy nhất"""
-        if not self.bm25 or not self.all_chunks or not query.strip():
-            return []
-
-        tokens = self._tokenize(query)
-        if not tokens:
-            return []
-
-        scores = self.bm25.get_scores(tokens)
-
-        if scores.max() == 0:
-            return []
-
-        n_docs = len(scores)
-        top_indices = np.argpartition(scores, -min(top_k, n_docs))[-top_k:]
-        top_indices = top_indices[np.argsort(scores[top_indices])[::-1]]
-
-        result = []
-        for idx in top_indices:
-            score = float(scores[idx])
-            if score == 0:
-                continue
-            chunk = self.all_chunks[int(idx)].copy()
-            chunk["bm25_score"] = score
-            result.append(chunk)
-
-        return result
-
-    def search(self, queries: List[str], top_k: int = 50) -> List[Dict]:
-        if not self.bm25 or not self.all_chunks or not queries: return []
-        token_list = [self._tokenize(str(q)) for q in queries]
-        token_list = [t for t in token_list if t]
-        if not token_list: return []
-        score_matrix = self._batch_scores(token_list)
-        K = 60
-        n_docs = score_matrix.shape[1]
-        rrf_total = np.zeros(n_docs, dtype=np.float32)
-        for row in score_matrix:
-            nonzero_mask = row > 0
-            if not nonzero_mask.any(): continue
-            indices = np.where(nonzero_mask)[0]
-            ranked = indices[np.argsort(row[indices])[::-1]][:top_k]
-            ranks = np.arange(len(ranked), dtype=np.float32)
-            rrf_total[ranked] += 1.0 / (K + ranks + 1)
-        if rrf_total.max() == 0: return []
-        top_indices = np.argpartition(rrf_total, -min(top_k, n_docs))[-top_k:]
-        top_indices = top_indices[np.argsort(rrf_total[top_indices])[::-1]]
-        result = []
-        for idx in top_indices:
-            score = float(rrf_total[idx])
-            if score == 0: continue
-            chunk = self.all_chunks[int(idx)].copy()
-            chunk["keyword_score"] = score
-            chunk["entity_weighted_bm25_score"] = score
-            result.append(chunk)
-        return result
-
-    def search_with_entity_scores(
-            self, entity_scores: list, top_k: int = 50, min_entity_norm_score: float = 0.15,
-            base_entities: Optional[List[str]] = None, base_entity_weight: float = 1.0,
-    ) -> List[Dict]:
-        if not self.bm25 or not self.all_chunks: return []
-        if not entity_scores and not base_entities: return []
-        token_list: List[List[str]] = []
-        weights: List[float] = []
-        if base_entities:
-            for entity_name in base_entities:
-                entity_name = entity_name.strip()
-                if not entity_name: continue
-                tokens = self._tokenize(entity_name)
-                if not tokens: continue
-                token_list.append(tokens)
-                weights.append(base_entity_weight)
-        for entity in entity_scores:
-            entity_name = entity.entity_name if hasattr(entity, "entity_name") else entity.get("entity_name", "")
-            weight = entity.norm_score if hasattr(entity, "norm_score") else entity.get("norm_score", 0.0)
-            if weight < min_entity_norm_score or not entity_name.strip(): continue
-            tokens = self._tokenize(entity_name)
-            if not tokens: continue
-            token_list.append(tokens)
-            weights.append(float(weight))
-        if not token_list: return []
-        score_matrix = self._batch_scores(token_list)
-        weights_arr = np.array(weights, dtype=np.float32)
-        combined = weights_arr @ score_matrix
-        if combined.max() == 0: return []
-        n_docs = combined.shape[0]
-        top_indices = np.argpartition(combined, -min(top_k, n_docs))[-top_k:]
-        top_indices = top_indices[np.argsort(combined[top_indices])[::-1]]
-        result = []
-        for idx in top_indices:
-            score = float(combined[idx])
-            if score == 0: continue
-            chunk = self.all_chunks[int(idx)].copy()
-            chunk["entity_weighted_bm25_score"] = score
-            chunk["keyword_score"] = score
-            result.append(chunk)
-        return result
 
 # =========================================================================
 # HELPER: FORMAT DICT/LIST → PROSE (Cho UI)
