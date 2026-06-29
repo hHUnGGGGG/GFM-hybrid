@@ -99,7 +99,7 @@ model_cache/                                   # Cache embedding (gitignored)
 | GPU | NVIDIA + **CUDA 12.x** (bắt buộc cho GFM/GNN) |
 | LLM API | Khóa OpenAI (endpoint tương thích, vd Yescale) |
 
-Mô hình mặc định (bài báo): LLM `GPT-4o-mini`, cross-encoder
+Mô hình mặc định: LLM `GPT-4o-mini`, cross-encoder
 `BAAI/bge-reranker-v2-m3`, embedding `Multilingual-E5` (cấu hình repo dùng
 `dangvantuan/vietnamese-embedding` cho tiếng Việt).
 
