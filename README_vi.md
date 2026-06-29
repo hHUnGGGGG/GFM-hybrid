@@ -42,7 +42,7 @@ Mỗi bước gồm pha truy hồi (đồ thị + BM25 theo thực thể) và ph
    → `gfmrag_hybrid/gfm/retriever_with_entity_scores.py`
 2. **Entity-Augmented BM25 Retrieval** — ghép seed entities + thực thể đồ thị điểm
    cao ($\tilde{P}_q \ge \theta=0.10$) + sub-question thành **một** câu BM25.
-   → `gfmrag_hybrid/workflow/core_engine.py` (`BM25Searcher`)
+   → `gfmrag_hybrid/bm25/searcher.py` (`BM25Searcher`)
 3. **Step-Local Global Chunk Pool** — gộp hai nhánh, giữ riêng điểm, **làm mới mỗi
    bước**. → `core_engine.py`
 4. **Cross-Encoder Reranking + IRCoT** — `BAAI/bge-reranker-v2-m3` (max-pooling) +
@@ -68,6 +68,10 @@ ngữ vi/en) và **Stage 1** (tùy chọn gom cụm chunk + xây KG) — xem
 gfmrag_hybrid/
 ├── gfm/
 │   └── retriever_with_entity_scores.py        # Component 1 (GFM + entity scores)
+├── bm25/
+│   ├── searcher.py                            # Component 2 (BM25Searcher, theo thực thể)
+│   ├── normalize.py                           # Chuẩn hóa thực thể (normalize_entities)
+│   └── stopwords.py                           # Stopwords vi/en (VIETNAMESE_STOPWORDS)
 ├── chunkers/document_chunker.py               # SemanticChunker (tách chunk)
 ├── kg_construction/chunk_grouper.py           # Gom cụm chunk (stage1)
 ├── utils/text_tokenize.py                     # Tách từ vi/en
@@ -76,7 +80,7 @@ gfmrag_hybrid/
     ├── stage1_index_dataset.py                # Xây KG-index
     ├── stage2_kg_pretrain.py / stage2_qa_finetune.py
     ├── stage3_qa_ircot_inference_*.py         # Suy luận IRCoT
-    ├── core_engine.py                         # Components 2–4 (BM25 + pool + rerank + IRCoT)
+    ├── core_engine.py                         # Components 3–4 (pool + rerank + IRCoT)
     ├── app.py                                 # Chatbot (Streamlit)
     └── config/                                # Cấu hình Hydra
 data/<data_name>/{raw, processed}              # Bộ dữ liệu
@@ -108,7 +112,7 @@ pip install -r requirements.txt
 pip install -e .            # cài gói gfmrag_hybrid (editable)
 ```
 
-Tạo `.env` trong `gfm-rag/` (KHÔNG commit):
+Tạo `.env` ở thư mục gốc dự án (KHÔNG commit):
 
 ```dotenv
 OPENAI_API_KEY=sk-...
