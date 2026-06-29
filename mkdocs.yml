@@ -94,13 +94,11 @@ extra_javascript:
 
 # 下面的是需要自定义的内容，请不要修改上方的内容，上面都是在开启各种插件和功能
 
-site_name: GFM-RAG
-site_url: https://rmanluo.github.io/gfm-rag/
+site_name: GFM-Hybrid
+site_url: https://hHUnGGGGG.github.io/GFM-hybrid/
 nav:
   - Home:
       - Welcome: index.md
-      - Development: DEVELOPING.md
-      - Changelog: CHANGELOG.md
   - Installation: install.md
   - Workflow:
       - Data Preparation: workflow/data_preparation.md
@@ -135,8 +133,8 @@ nav:
           - NER Model: api/kg_construnction/ner_model.md
           - Entity Linking Model: api/kg_construnction/el_model.md
           - OpenIE Model: api/kg_construnction/openie_model.md
-repo_url: https://github.com/RManLuo/gfm-rag
-repo_name: gfm-rag
+repo_url: https://github.com/hHUnGGGGG/GFM-hybrid
+repo_name: hHUnGGGGG/GFM-hybrid
 
 plugins:
   - search # 内置插件，在标题中添加了一个搜索栏，允许用户搜索您的文档

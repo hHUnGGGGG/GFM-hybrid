@@ -75,6 +75,8 @@ gfmrag_hybrid/
 ├── chunkers/document_chunker.py               # SemanticChunker (tách chunk)
 ├── kg_construction/chunk_grouper.py           # Gom cụm chunk (stage1)
 ├── utils/text_tokenize.py                     # Tách từ vi/en
+├── gfm_model/                                 # Checkpoint GFM — config.json + model.pth (Git LFS)
+├── model_custom/                              # Checkpoint GFM tùy chỉnh (Git LFS)
 └── workflow/
     ├── stage0_split_documents.py              # Splitter
     ├── stage1_index_dataset.py                # Xây KG-index
@@ -83,9 +85,8 @@ gfmrag_hybrid/
     ├── core_engine.py                         # Components 3–4 (pool + rerank + IRCoT)
     ├── app.py                                 # Chatbot (Streamlit)
     └── config/                                # Cấu hình Hydra
-data/<data_name>/{raw, processed}              # Bộ dữ liệu
-gfm_model/                                     # Checkpoint GFM
-model_cache/                                   # Cache embedding
+data/<data_name>/{raw, processed}              # Bộ dữ liệu (gitignored)
+model_cache/                                   # Cache embedding (gitignored)
 ```
 
 ---

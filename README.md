@@ -78,6 +78,8 @@ gfmrag_hybrid/
 ├── chunkers/document_chunker.py               # SemanticChunker (splitting)
 ├── kg_construction/chunk_grouper.py           # Chunk grouping (stage1)
 ├── utils/text_tokenize.py                     # vi/en tokenisation
+├── gfm_model/                                 # GFM checkpoint — config.json + model.pth (Git LFS)
+├── model_custom/                              # Custom GFM checkpoint (Git LFS)
 └── workflow/
     ├── stage0_split_documents.py              # Splitter
     ├── stage1_index_dataset.py                # Build KG-index
@@ -86,9 +88,8 @@ gfmrag_hybrid/
     ├── core_engine.py                         # Components 3–4 (pool + rerank + IRCoT)
     ├── app.py                                 # Chatbot (Streamlit)
     └── config/                                # Hydra configs
-data/<data_name>/{raw, processed}              # Datasets
-gfm_model/                                     # GFM checkpoint
-model_cache/                                   # Embedding cache
+data/<data_name>/{raw, processed}              # Datasets (gitignored)
+model_cache/                                   # Embedding cache (gitignored)
 ```
 
 ---
@@ -101,7 +102,7 @@ model_cache/                                   # Embedding cache
 | GPU | NVIDIA + **CUDA 12.x** (required for GFM/GNN) |
 | LLM API | OpenAI key (OpenAI-compatible endpoint, e.g. Yescale) |
 
-Default models (paper): LLM `GPT-4o-mini`, cross-encoder
+Default models: LLM `GPT-4o-mini`, cross-encoder
 `BAAI/bge-reranker-v2-m3`, embedding `Multilingual-E5` (repo config uses
 `dangvantuan/vietnamese-embedding` for Vietnamese).
 
