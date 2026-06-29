@@ -178,16 +178,5 @@ python LLM_as_a_judge.py --input prediction.jsonl --output evaluated.jsonl --wor
 ```
 `prediction.jsonl` mỗi dòng: `id`, `question`, `answer` (tham chiếu), `response`.
 
-## 10. Trích dẫn
-
-```bibtex
-@article{nguyen2025gfmhybrid,
-  title  = {GFM-Hybrid: Entity-Score-Guided Hybrid Retrieval with Iterative
-            Chain-of-Thought Reasoning for Multi-Hop and Medical Question Answering},
-  author = {Nguyen, Minh Hung and Le, Van Thanh},
-  year   = {2025}
-}
-```
-
 GFM-Hybrid mở rộng **GFM-RAG** (Luo et al., NeurIPS 2025), lấy cảm hứng từ IRCoT,
 HippoRAG, GraphRAG, LightRAG cùng họ reranker/embedding BGE.

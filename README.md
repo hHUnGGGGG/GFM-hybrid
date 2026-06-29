@@ -181,16 +181,5 @@ python LLM_as_a_judge.py --input prediction.jsonl --output evaluated.jsonl --wor
 ```
 Each line in `prediction.jsonl`: `id`, `question`, `answer` (reference), `response`.
 
-## 10. Citation
-
-```bibtex
-@article{nguyen2025gfmhybrid,
-  title  = {GFM-Hybrid: Entity-Score-Guided Hybrid Retrieval with Iterative
-            Chain-of-Thought Reasoning for Multi-Hop and Medical Question Answering},
-  author = {Nguyen, Minh Hung and Le, Van Thanh},
-  year   = {2025}
-}
-```
-
 GFM-Hybrid extends **GFM-RAG** (Luo et al., NeurIPS 2025) and draws inspiration from
 IRCoT, HippoRAG, GraphRAG, LightRAG and the BGE reranker/embedding family.
