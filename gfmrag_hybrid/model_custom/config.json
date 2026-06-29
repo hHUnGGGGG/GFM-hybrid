@@ -1,0 +1,31 @@
+{
+    "text_emb_model_config": {
+        "_target_": "gfmrag.text_emb_models.BaseTextEmbModel",
+        "text_emb_model_name": "sentence-transformers/all-mpnet-base-v2",
+        "normalize": true,
+        "batch_size": 32,
+        "query_instruct": "Instruct: Given a web search query, retrieve relevant passages that answer the query\nQuery: ",
+        "passage_instruct": null,
+        "model_kwargs": null
+    },
+    "model_config": {
+        "_target_": "gfmrag.models.gfm_reasoner.GraphReasoner",
+        "entity_model": {
+            "_target_": "gfmrag.models.ultra.models.QueryNBFNet",
+            "input_dim": 1024,
+            "hidden_dims": [
+                1024,
+                1024,
+                1024,
+                1024,
+                1024,
+                1024
+            ],
+            "message_func": "distmult",
+            "aggregate_func": "sum",
+            "short_cut": true,
+            "layer_norm": true
+        },
+        "rel_emb_dim": 1024
+    }
+}

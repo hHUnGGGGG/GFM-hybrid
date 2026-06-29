@@ -23,7 +23,7 @@ llm:
 
 graph_retriever:
   _target_: gfmrag_hybrid.models.GNNRetriever
-  model_path: E:\arag\gfm-rag\gfm_model
+  model_path: ${hydra:runtime.cwd}/gfmrag_hybrid/gfm_model
 
 test:
   retrieval_batch_size: 1

@@ -1,0 +1,2 @@
+gfmrag_hybrid/gfm_model/*.pth filter=lfs diff=lfs merge=lfs -text
+gfmrag_hybrid/model_custom/*.pth filter=lfs diff=lfs merge=lfs -text

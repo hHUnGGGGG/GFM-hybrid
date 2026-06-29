@@ -34,3 +34,9 @@ site/
 .vscode
 .idea/
 .DS_Store
+
+# --- Model checkpoints tracked via Git LFS (ngoại lệ cho các rule ở trên) ---
+!gfmrag_hybrid/gfm_model/
+!gfmrag_hybrid/gfm_model/**
+!gfmrag_hybrid/model_custom/
+!gfmrag_hybrid/model_custom/**

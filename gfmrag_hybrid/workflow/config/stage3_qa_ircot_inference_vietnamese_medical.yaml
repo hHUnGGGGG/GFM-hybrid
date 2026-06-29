@@ -24,7 +24,7 @@ llm:
   retry: 5
 
 graph_retriever:
-  model_path: rmanluo/GFM-RAG-8M
+  model_path: ${hydra:runtime.cwd}/gfmrag_hybrid/gfm_model
   doc_ranker: ${doc_ranker}
   ner_model: ${ner_model}
   el_model: ${el_model}

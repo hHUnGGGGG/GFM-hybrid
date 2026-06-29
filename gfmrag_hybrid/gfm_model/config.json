@@ -1,0 +1,31 @@
+{
+    "text_emb_model_config": {
+        "_target_": "gfmrag.text_emb_models.BaseTextEmbModel",
+        "text_emb_model_name": "sentence-transformers/all-mpnet-base-v2",
+        "normalize": false,
+        "batch_size": 32,
+        "query_instruct": null,
+        "passage_instruct": null,
+        "model_kwargs": null
+    },
+    "model_config": {
+        "_target_": "gfmrag.models.GNNRetriever",
+        "entity_model": {
+            "_target_": "gfmrag.ultra.models.QueryNBFNet",
+            "input_dim": 512,
+            "hidden_dims": [
+                512,
+                512,
+                512,
+                512,
+                512,
+                512
+            ],
+            "message_func": "distmult",
+            "aggregate_func": "sum",
+            "short_cut": true,
+            "layer_norm": true
+        },
+        "rel_emb_dim": 768
+    }
+}
