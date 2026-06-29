@@ -2,179 +2,182 @@
 
 **Entity-Score-Guided Hybrid Retrieval with Iterative Chain-of-Thought Reasoning for Multi-Hop and Medical Question Answering**
 
-Đây là **gói mã nguồn (`gfmrag_hybrid`)** của GFM-Hybrid — một pipeline **truy hồi + suy
-luận hợp nhất** cho hỏi đáp đa bước (multi-hop) và hỏi đáp y tế. Ý tưởng cốt lõi:
-một **Graph Foundation Model (GFM-RAG)** khi suy luận trên đồ thị tri thức sinh ra
-một **tensor độ liên quan thực thể** $P_q \in [0,1]^{|\mathcal{V}|}$ — thay vì vứt
-bỏ tensor này, GFM-Hybrid **giữ lại và dùng nó để lái một bộ tìm kiếm BM25** theo
-thực thể. Bằng chứng từ nhánh đồ thị và nhánh từ vựng được gộp vào một **pool làm
-mới mỗi bước**, một **cross-encoder** xếp hạng tinh, và vòng lặp **IRCoT** với đầu
-ra JSON có cấu trúc điều phối toàn bộ qua nhiều bước.
+This is the **source package (`gfmrag_hybrid`)** of GFM-Hybrid — a **unified
+retrieval-and-reasoning pipeline** for multi-hop and medical question answering.
+Core idea: a **Graph Foundation Model (GFM-RAG)**, while reasoning over a knowledge
+graph, produces an **entity-relevance tensor** $P_q \in [0,1]^{|\mathcal{V}|}$.
+Instead of discarding this tensor, GFM-Hybrid **keeps it and uses it to steer an
+entity-augmented BM25 searcher**. Graph and lexical evidence are merged in a
+**step-local pool**, a **cross-encoder** does precision ranking, and an **IRCoT**
+loop with structured JSON output drives the process across multiple hops.
 
-> Đồ thị cung cấp **độ rộng cấu trúc**, còn nhánh từ vựng theo thực thể khôi phục
-> **chi tiết bề mặt** mà đồ thị (không đầy đủ) bỏ sót — quan trọng cho y tế và ngôn
-> ngữ ít tài nguyên như tiếng Việt.
+> The graph supplies **structural breadth**, while entity-augmented lexical matching
+> recovers the **surface-level detail** an incomplete graph misses — crucial for
+> medical text and low-resource languages such as Vietnamese.
 
-## Kết quả chính (so với baseline mạnh nhất)
+## Headline results (vs. strongest baseline)
 
 | Dataset | Recall@2 | Recall@5 | EM / F1 | LLM-Judge |
 |---|---|---|---|---|
 | HotpotQA (EN, 2-hop) | **86.75** | **95.65** | **66.10 / 79.57** | — |
 | MuSiQue (EN, 2–4 hop) | **56.32** | **74.88** | **41.90 / 52.46** | — |
-| PubMedQA (EN, y tế) | **65.79** | **86.76** | — | **401/1000** |
-| Vietnamese Medical (y tế) | **98.50** | **98.79** | — | **886/1000** |
+| PubMedQA (EN, medical) | **65.79** | **86.76** | — | **401/1000** |
+| Vietnamese Medical | **98.50** | **98.79** | — | **886/1000** |
 
 ---
 
-## 1. Kiến trúc tổng quan
+## 1. Overall Architecture
 
-![Kiến trúc tổng quan GFM-Hybrid](assets/figures/pipeline_overview.png)
+![GFM-Hybrid overall architecture](assets/figures/pipeline_overview.png)
 
-Vòng lặp xen kẽ chạy tối đa `max_steps` bước, duy trì **bốn bộ nhớ toàn cục**:
-**global chunk pool** (xóa sạch đầu mỗi bước), **cumulative facts** (ngữ cảnh dài
-hạn), **all-discovered-entities** (tránh truy vấn lặp), **previous sub-questions**.
-Mỗi bước gồm pha truy hồi (đồ thị + BM25 theo thực thể) và pha suy luận IRCoT.
+The interleaved loop runs for up to `max_steps` steps and maintains **four global
+memories**: a **global chunk pool** (cleared at the start of each step),
+**cumulative facts** (long-term context), **all-discovered-entities** (avoid
+repeated lookups), and **previous sub-questions**. Each step runs a retrieval phase
+(graph + entity-augmented BM25) and an IRCoT reasoning phase.
 
-### Bốn thành phần
+### Four components
 
-1. **Graph-Foundation Retriever with Entity Scores** — trả về *cả* tài liệu xếp
-   hạng *và* tensor $\tilde{P}_q$ (chuẩn hóa min–max); chunk chấm bằng RRF ($k=60$).
-   → `gfmrag_hybrid/gfm/retriever_with_entity_scores.py`
-2. **Entity-Augmented BM25 Retrieval** — ghép seed entities + thực thể đồ thị điểm
-   cao ($\tilde{P}_q \ge \theta=0.10$) + sub-question thành **một** câu BM25.
-   → `gfmrag_hybrid/workflow/core_engine.py` (`BM25Searcher`)
-3. **Step-Local Global Chunk Pool** — gộp hai nhánh, giữ riêng điểm, **làm mới mỗi
-   bước**. → `core_engine.py`
+1. **Graph-Foundation Retriever with Entity Scores** — returns *both* ranked
+   documents *and* the min–max-normalised tensor $\tilde{P}_q$; chunks are scored
+   with RRF ($k=60$). → `gfmrag_hybrid/gfm/retriever_with_entity_scores.py`
+2. **Entity-Augmented BM25 Retrieval** — concatenates seed entities + high-scoring
+   graph entities ($\tilde{P}_q \ge \theta=0.10$) + the sub-question into **one**
+   BM25 query. → `gfmrag_hybrid/workflow/core_engine.py` (`BM25Searcher`)
+3. **Step-Local Global Chunk Pool** — merges both branches keeping their scores
+   separate, **refreshed every step**. → `core_engine.py`
 4. **Cross-Encoder Reranking + IRCoT** — `BAAI/bge-reranker-v2-m3` (max-pooling) +
-   LLM sinh JSON 5 trường (`reasoning`, `extracted_facts`, `missing_entities`,
-   `sub_question`, `final_answer`). → `core_engine.py` (`agent_reasoning_with_reranker`)
+   an LLM emitting a 5-field JSON object (`reasoning`, `extracted_facts`,
+   `missing_entities`, `sub_question`, `final_answer`).
+   → `core_engine.py` (`agent_reasoning_with_reranker`)
 
-![Module truy hồi chi tiết](assets/figures/retrieval_module.png)
+![Detailed retrieval module](assets/figures/retrieval_module.png)
 
-## 2. Xây dựng đồ thị tri thức (offline)
+## 2. Offline Knowledge-Graph Construction
 
-![Xây dựng KG offline](assets/figures/kg_construction.png)
+![Offline KG construction](assets/figures/kg_construction.png)
 
-Tách chunk (LLM/SemanticChunker) → NER + trích triple → ma trận thực thể–tài liệu →
-thêm quan hệ đồng nghĩa. Trong repo, bước offline gồm **Stage 0** (splitter, đa ngôn
-ngữ vi/en) và **Stage 1** (tùy chọn gom cụm chunk + xây KG) — xem
-`gfmrag_hybrid/workflow/stage0_split_documents.py` và `gfmrag_hybrid/kg_construction/chunk_grouper.py`.
+Documents are chunked (LLM/SemanticChunker) → NER + triple extraction →
+entity–document matrix → synonym merging. In this repo the offline stage is
+organised into **Stage 0** (splitter, bilingual vi/en) and **Stage 1** (optional
+chunk grouping + KG building) — see `gfmrag_hybrid/workflow/stage0_split_documents.py` and
+`gfmrag_hybrid/kg_construction/chunk_grouper.py`.
 
 ---
 
-## 3. Cấu trúc gói `gfmrag_hybrid`
+## 3. Package layout (`gfmrag_hybrid`)
 
 ```
 gfmrag_hybrid/
 ├── gfm/
 │   └── retriever_with_entity_scores.py        # Component 1 (GFM + entity scores)
-├── chunkers/document_chunker.py               # SemanticChunker (tách chunk)
-├── kg_construction/chunk_grouper.py           # Gom cụm chunk (stage1)
-├── utils/text_tokenize.py                     # Tách từ vi/en
+├── chunkers/document_chunker.py               # SemanticChunker (splitting)
+├── kg_construction/chunk_grouper.py           # Chunk grouping (stage1)
+├── utils/text_tokenize.py                     # vi/en tokenisation
 └── workflow/
     ├── stage0_split_documents.py              # Splitter
-    ├── stage1_index_dataset.py                # Xây KG-index
+    ├── stage1_index_dataset.py                # Build KG-index
     ├── stage2_kg_pretrain.py / stage2_qa_finetune.py
-    ├── stage3_qa_ircot_inference_*.py         # Suy luận IRCoT
+    ├── stage3_qa_ircot_inference_*.py         # IRCoT inference
     ├── core_engine.py                         # Components 2–4 (BM25 + pool + rerank + IRCoT)
     ├── app.py                                 # Chatbot (Streamlit)
-    └── config/                                # Cấu hình Hydra
-data/<data_name>/{raw, processed}              # Bộ dữ liệu
-gfm_model/                                     # Checkpoint GFM
-model_cache/                                   # Cache embedding
+    └── config/                                # Hydra configs
+data/<data_name>/{raw, processed}              # Datasets
+gfm_model/                                     # GFM checkpoint
+model_cache/                                   # Embedding cache
 ```
 
 ---
 
-## 4. Yêu cầu hệ thống
+## 4. Requirements
 
-| Thành phần | Yêu cầu |
+| Component | Requirement |
 |---|---|
 | Python | **3.12** (>=3.12, <3.13) |
-| GPU | NVIDIA + **CUDA 12.x** (bắt buộc cho GFM/GNN) |
-| LLM API | Khóa OpenAI (endpoint tương thích, vd Yescale) |
+| GPU | NVIDIA + **CUDA 12.x** (required for GFM/GNN) |
+| LLM API | OpenAI key (OpenAI-compatible endpoint, e.g. Yescale) |
 
-Mô hình mặc định (bài báo): LLM `GPT-4o-mini`, cross-encoder
-`BAAI/bge-reranker-v2-m3`, embedding `Multilingual-E5` (cấu hình repo dùng
-`dangvantuan/vietnamese-embedding` cho tiếng Việt).
+Default models (paper): LLM `GPT-4o-mini`, cross-encoder
+`BAAI/bge-reranker-v2-m3`, embedding `Multilingual-E5` (repo config uses
+`dangvantuan/vietnamese-embedding` for Vietnamese).
 
-## 5. Cài đặt
+## 5. Installation
 
 ```bash
 conda create -n gfmhybrid python=3.12 && conda activate gfmhybrid
 conda install cuda-toolkit -c nvidia/label/cuda-12.4.1
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 pip install -r requirements.txt
-pip install -e .            # cài gói gfmrag_hybrid (editable)
+pip install -e .            # install the gfmrag_hybrid package (editable)
 ```
 
-Tạo `.env` trong `gfm-rag/` (KHÔNG commit):
+Create `.env` inside `gfm-rag/` (do NOT commit):
 
 ```dotenv
 OPENAI_API_KEY=sk-...
 HF_TOKEN=hf_...
 ```
 
-## 6. Dữ liệu
+## 6. Data
 
-**Link data:** [Google Drive](https://drive.google.com/file/d/1ILAAFH2UpWpyD9WC1A2eFbjddus2eQ0V/view?usp=drive_link)
+**Data link:** [Google Drive](https://drive.google.com/file/d/1ILAAFH2UpWpyD9WC1A2eFbjddus2eQ0V/view?usp=drive_link)
 
-Đặt dữ liệu thô tại `data/<data_name>/raw/`:
-- `dataset_corpus.json` — `{ "tên_tài_liệu": "nội dung..." }`
-- `train.json` / `test.json` (tuỳ chọn) — `id`, `question`, `answer`, `supporting_facts`
+Place raw data under `data/<data_name>/raw/`:
+- `dataset_corpus.json` — `{ "doc_title": "content..." }`
+- `train.json` / `test.json` (optional) — `id`, `question`, `answer`, `supporting_facts`
 
-| Dataset | Lĩnh vực | Ngôn ngữ | Suy luận | Nguồn |
+| Dataset | Domain | Language | Reasoning | Source |
 |---|---|---|---|---|
-| HotpotQA | Tổng quát | EN | 2-hop | Wikipedia |
-| MuSiQue | Tổng quát | EN | 2–4 hop | Wikipedia |
-| PubMedQA | Y tế | EN | Multi-hop | Abstract PubMed |
-| Vietnamese Medical | Y tế | VI | Multi-hop | Hướng dẫn điều trị / dược thư |
+| HotpotQA | General | EN | 2-hop | Wikipedia |
+| MuSiQue | General | EN | 2–4 hop | Wikipedia |
+| PubMedQA | Medical | EN | Multi-hop | PubMed abstracts |
+| Vietnamese Medical | Medical | VI | Multi-hop | Treatment guidelines / pharmacopoeia |
 
-## 7. Sử dụng
+## 7. Usage
 
 ```bash
-# Stage 0 — tách document -> chunk (đa ngôn ngữ vi/en)
+# Stage 0 — split documents -> chunks (bilingual vi/en)
 python -m gfmrag_hybrid.workflow.stage0_split_documents \
     dataset.data_name=vietnamese_medical language=vi
 
-# Stage 1 — xây KG-index (bật gom cụm chunk tùy chọn)
+# Stage 1 — build KG-index (optionally enable chunk grouping)
 python -m gfmrag_hybrid.workflow.stage1_index_dataset \
     dataset.data_name=vietnamese_medical language=vi \
     chunk_grouping.enabled=true chunk_grouping.granularity=chunk
 
-# Stage 2 — (tùy chọn) pre-train / fine-tune GFM
+# Stage 2 — (optional) pre-train / fine-tune GFM
 python -m gfmrag_hybrid.workflow.stage2_kg_pretrain
 python -m gfmrag_hybrid.workflow.stage2_qa_finetune
 
-# Stage 3 — suy luận IRCoT (GFM-Hybrid)
+# Stage 3 — IRCoT inference (GFM-Hybrid)
 python -m gfmrag_hybrid.workflow.stage3_qa_ircot_inference_chunks_vietnamese_medical \
     dataset.data_name=vietnamese_medical test.max_steps=3 test.top_k=5
 
-# Chatbot web
+# Web chatbot
 cd gfmrag_hybrid/workflow && streamlit run app.py
 ```
 
-## 8. Siêu tham số (theo bài báo)
+## 8. Hyperparameters (from the paper)
 
-| Tham số | Giá trị | Vai trò |
+| Parameter | Value | Role |
 |---|---|---|
-| `top_k` / `top_k_chunks` | 5 / 5 | Tài liệu nhánh đồ thị / chunk vào LLM |
-| `max_steps` | 3 | Số bước IRCoT tối đa |
-| `top_entity_k` | 15 | Thực thể đồ thị điểm cao giữ lại / bước |
-| `max_bm25_chunks` / `max_gfm_chunks` | 15 / 20 | Giới hạn chunk mỗi nhánh |
-| `doc_ranker.top_k` | 30 | Thực thể tính trọng số xếp hạng tài liệu |
-| `k` (RRF) | 60 | Hằng số làm mượt RRF |
-| `θ` (entity threshold) | 0.10 | Ngưỡng $\tilde{P}_q$ để thực thể vào câu BM25 |
+| `top_k` / `top_k_chunks` | 5 / 5 | Graph-branch docs / context chunks to the LLM |
+| `max_steps` | 3 | Max IRCoT reasoning steps |
+| `top_entity_k` | 15 | High-scoring graph entities kept per step |
+| `max_bm25_chunks` / `max_gfm_chunks` | 15 / 20 | Chunk cap per branch |
+| `doc_ranker.top_k` | 30 | Entities used for document-ranking weights |
+| `k` (RRF) | 60 | RRF smoothing constant |
+| `θ` (entity threshold) | 0.10 | Min. $\tilde{P}_q$ for an entity to join the BM25 query |
 
-## 9. Đánh giá (LLM-as-a-Judge)
+## 9. Evaluation (LLM-as-a-Judge)
 
 ```bash
 export OPENAI_API_KEY="sk-..."
 python LLM_as_a_judge.py --input prediction.jsonl --output evaluated.jsonl --workers 5
 ```
-`prediction.jsonl` mỗi dòng: `id`, `question`, `answer` (tham chiếu), `response`.
+Each line in `prediction.jsonl`: `id`, `question`, `answer` (reference), `response`.
 
-## 10. Trích dẫn
+## 10. Citation
 
 ```bibtex
 @article{nguyen2025gfmhybrid,
@@ -185,5 +188,5 @@ python LLM_as_a_judge.py --input prediction.jsonl --output evaluated.jsonl --wor
 }
 ```
 
-GFM-Hybrid mở rộng **GFM-RAG** (Luo et al., NeurIPS 2025), lấy cảm hứng từ IRCoT,
-HippoRAG, GraphRAG, LightRAG cùng họ reranker/embedding BGE.
+GFM-Hybrid extends **GFM-RAG** (Luo et al., NeurIPS 2025) and draws inspiration from
+IRCoT, HippoRAG, GraphRAG, LightRAG and the BGE reranker/embedding family.
