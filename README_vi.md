@@ -109,7 +109,6 @@ Mô hình mặc định: LLM `GPT-4o-mini`, cross-encoder
 conda create -n gfmhybrid python=3.12 && conda activate gfmhybrid
 conda install cuda-toolkit -c nvidia/label/cuda-12.4.1
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-pip install -r requirements.txt
 pip install -e .            # cài gói gfmrag_hybrid (editable)
 ```
 
