@@ -178,13 +178,9 @@ class GFMRetriever:
         # 2. ĐƯA GRAPH & KNOWLEDGE GRAPH LÊN GPU
         graph_retriever = graph_retriever.to(device)
         graph_retriever.eval()
-        if hasattr(torch, 'compile') and device.type == 'cuda':
-            try:
-                # Tự động tối ưu hoá các phép toán GNN
-                graph_retriever = torch.compile(graph_retriever)
-                logger.info("[INFO] Đã bật torch.compile cho GNN Model.")
-            except Exception as e:
-                logger.warning(f"Không thể compile GNN: {e}")
+        # KHÔNG dùng torch.compile: backend inductor cần Triton, vốn không chạy được
+        # trên Windows -> lỗi lúc forward ("Cannot find a working triton installation").
+        # torch.compile là lazy nên try/except quanh nó không bắt được lỗi runtime.
 
         qa_data = QADataset(
             **cfg.dataset,

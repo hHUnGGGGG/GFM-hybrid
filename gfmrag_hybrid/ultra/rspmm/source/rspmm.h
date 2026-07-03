@@ -2,7 +2,11 @@
 
 #include <tuple>
 
-#include <torch/extension.h>
+// Do NOT include <torch/extension.h> here: it pulls in pybind11, and this header is
+// also used by rspmm.cu, so nvcc would have to compile pybind11 and fail (operator new)
+// on Windows. Only ATen tensor types are needed; pybind is included in rspmm.cpp only.
+#include <ATen/ATen.h>
+#include <ATen/TensorUtils.h>
 //#include <ATen/SparseTensorUtils.h>
 #include <ATen/native/SparseTensorUtils.h>
 

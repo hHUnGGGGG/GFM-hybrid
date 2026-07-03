@@ -6,6 +6,7 @@ Chạy:
 """
 
 import os
+from pathlib import Path
 import pandas as pd
 import torch
 import streamlit as st
@@ -130,10 +131,16 @@ st.markdown("""
 # ============================================================
 @st.cache_resource(show_spinner="⚙️ Đang khởi tạo AI Engine và Cơ sở dữ liệu Y khoa...")
 def load_system():
-    os.environ["OPENAI_API_KEY"] = ""
+    os.environ["OPENAI_API_KEY"] = "sk-BKvAG85L7hcOo5Co7tHq7UCIyTwhJbdE7awCcvEr4tpEl6Fx"
     if not GlobalHydra.instance().is_initialized():
         initialize(version_base=None, config_path="config")
     cfg = compose(config_name="stage3_qa_ircot_inference_chunks_vietnamese_medical")
+
+    # Compose API không có HydraConfig nên ${hydra:runtime.cwd} không resolve được.
+    # Ghi đè model_path bằng đường dẫn tuyệt đối tính từ vị trí file này
+    # (app.py nằm ở gfmrag_hybrid/workflow → gfm_model ở gfmrag_hybrid/gfm_model).
+    gfm_model_path = Path(__file__).resolve().parents[1] / "gfm_model"
+    cfg.graph_retriever.model_path = str(gfm_model_path)
 
     # Dùng class mới khai báo hỗ trợ Entity Scores
     gfmrag_retriever = GFMRetrieverWithEntityScores.from_config(cfg)
@@ -354,4 +361,10 @@ if question:
                 })
 
             except Exception as e:
+                import traceback
+                tb = traceback.format_exc()
+                print("=" * 80)          # in đầy đủ ra terminal để debug
+                print(tb)
+                print("=" * 80)
                 st.error(f"❌ Lỗi: {str(e)}")
+                st.exception(e)           # hiện full traceback ngay trên web

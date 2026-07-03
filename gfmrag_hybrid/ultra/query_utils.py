@@ -521,15 +521,28 @@ def print_metrics_to_file(metrics, results_file, roundto=4):
 
 def cuda(obj, *args, **kwargs):
     """
-    Transfer any nested container of tensors to CUDA.
+    Transfer any nested container of tensors to the target device.
+
+    Tôn trọng `device=` được truyền vào (mặc định: cuda nếu có, không thì cpu) và
+    dùng `.to(device)` thay cho `.cuda()` cứng, nên không còn crash trên bản torch
+    CPU-only ("Torch not compiled with CUDA enabled").
     """
-    if hasattr(obj, "cuda"):
-        return obj.cuda(*args, **kwargs)
-    elif isinstance(obj, (str, bytes)):
+    device = kwargs.get("device", None)
+    if device is None:
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = torch.device(device)
+    if device.type == "cuda" and not torch.cuda.is_available():
+        device = torch.device("cpu")
+
+    if isinstance(obj, (str, bytes)):
         return obj
     elif isinstance(obj, dict):
-        return type(obj)({k: cuda(v, *args, **kwargs) for k, v in obj.items()})
+        return type(obj)({k: cuda(v, device=device) for k, v in obj.items()})
     elif isinstance(obj, (list, tuple)):
-        return type(obj)(cuda(x, *args, **kwargs) for x in obj)
+        return type(obj)(cuda(x, device=device) for x in obj)
+    elif hasattr(obj, "to"):
+        return obj.to(device)
+    elif hasattr(obj, "cuda"):
+        return obj.cuda()
 
     raise TypeError(f"Can't transfer object type `{type(obj)}`")

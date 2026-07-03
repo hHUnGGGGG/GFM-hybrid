@@ -370,17 +370,27 @@ def agent_reasoning_with_reranker(
         else:
             retrieved_docs = rerank_pool([current_query])
 
-    # --- Cơ chế Fallback đặc thù dành cho UI ---
-    if not found_final_answer and cumulative_facts:
+    # --- Tổng hợp câu trả lời cuối ---
+    # LUÔN gộp toàn bộ sự kiện đã xác nhận để trả lời ĐẦY ĐỦ mọi ý của câu hỏi gốc.
+    # (Câu hỏi có thể gồm nhiều phần; final_answer từng bước dễ chỉ trả lời một phần.)
+    if cumulative_facts:
         facts_text = json.dumps(cumulative_facts, ensure_ascii=False)
-        fallback_prompt = (f"Dựa hoàn toàn vào các sự kiện đã xác nhận sau:\n{facts_text}\n\nTrả lời câu hỏi:\n{current_query}\nTrả lời:")
+        synth_prompt = (
+            "Bạn là trợ lý y khoa. Chỉ dùng các SỰ KIỆN ĐÃ XÁC NHẬN dưới đây, tuyệt đối không bịa thêm.\n"
+            f"SỰ KIỆN ĐÃ XÁC NHẬN:\n{facts_text}\n\n"
+            f"CÂU HỎI (có thể gồm NHIỀU ý):\n{current_query}\n\n"
+            "Yêu cầu: Trả lời ĐẦY ĐỦ từng ý của câu hỏi bằng tiếng Việt, mạch lạc. "
+            "Nếu một ý không có dữ liệu trong các sự kiện trên, nêu rõ 'chưa có thông tin' cho ý đó.\n"
+            "Trả lời:"
+        )
         try:
             t_llm2 = time.time()
-            fallback_answer = llm.generate_sentence(fallback_prompt).strip()
+            synth_answer = llm.generate_sentence(synth_prompt).strip()
             total_time_llm += (time.time() - t_llm2)
-            if fallback_answer and not any(p in fallback_answer.lower() for p in ["không đủ", "không thể", "không biết"]):
-                found_final_answer = fallback_answer
-        except: pass
+            if synth_answer:
+                found_final_answer = synth_answer
+        except Exception:
+            pass
 
     final_output = found_final_answer or "Tài liệu hiện tại không đủ thông tin để kết luận."
 

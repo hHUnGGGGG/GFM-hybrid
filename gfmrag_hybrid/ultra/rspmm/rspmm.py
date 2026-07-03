@@ -204,19 +204,32 @@ def generalized_rspmm(
 
 def load_extension(name, sources, extra_cflags=None, extra_cuda_cflags=None, **kwargs):
     if extra_cflags is None:
-        extra_cflags = ["-Ofast"]
-        # PyTorch 2.2.1+ on Apple Silicon is now compiled by default with OpenMP
-        # However, installing OpenMP on macs properly and wiring it together to the compiler is tedious
-        # So on macs we turn off OpenMP (as the default behavior in all torch < 2.2.1 versions)
-        if torch.backends.openmp.is_available() and not sys.platform.startswith(
-            "darwin"
-        ):
-            extra_cflags += ["-fopenmp", "-DAT_PARALLEL_OPENMP"]
+        if sys.platform == "win32":
+            # MSVC (cl.exe) không hiểu cờ GCC (-Ofast/-fopenmp). Dùng cờ MSVC tương đương.
+            # /std:c++17 + /Zc:__cplusplus để pybind11 biên dịch đúng dưới nvcc.
+            extra_cflags = ["/O2", "/openmp", "/DAT_PARALLEL_OPENMP", "/std:c++17", "/Zc:__cplusplus"]
         else:
-            extra_cflags.append("-DAT_PARALLEL_NATIVE")
+            extra_cflags = ["-Ofast"]
+            # PyTorch 2.2.1+ on Apple Silicon is now compiled by default with OpenMP
+            # However, installing OpenMP on macs properly and wiring it together to the compiler is tedious
+            # So on macs we turn off OpenMP (as the default behavior in all torch < 2.2.1 versions)
+            if torch.backends.openmp.is_available() and not sys.platform.startswith(
+                "darwin"
+            ):
+                extra_cflags += ["-fopenmp", "-DAT_PARALLEL_OPENMP"]
+            else:
+                extra_cflags.append("-DAT_PARALLEL_NATIVE")
     if extra_cuda_cflags is None:
         if torch.cuda.is_available():
             extra_cuda_cflags = ["-O3"]
+            if sys.platform == "win32":
+                # Khớp chuẩn C++17 giữa nvcc và host MSVC để pybind11 không lỗi `operator new`.
+                extra_cuda_cflags += [
+                    "-std=c++17",
+                    "-Xcompiler", "/std:c++17",
+                    "-Xcompiler", "/Zc:__cplusplus",
+                    "-allow-unsupported-compiler",
+                ]
             extra_cflags.append("-DCUDA_OP")
         else:
             new_sources = []
@@ -227,6 +240,18 @@ def load_extension(name, sources, extra_cflags=None, extra_cuda_cflags=None, **k
 
     return cpp_extension.load(name, sources, extra_cflags, extra_cuda_cflags, **kwargs)
 
+
+if sys.platform == "win32":
+    # torch.utils.cpp_extension truy cập `distutils._msvccompiler._get_vc_env` để dò MSVC.
+    # Trên Python 3.12 (distutils stdlib đã bị bỏ), submodule này không tự import làm attribute,
+    # gây `AttributeError: module 'distutils' has no attribute '_msvccompiler'`.
+    # Pre-import bản distutils của setuptools để tạo sẵn attribute đó.
+    os.environ.setdefault("SETUPTOOLS_USE_DISTUTILS", "local")
+    try:
+        import setuptools  # noqa: F401
+        import distutils._msvccompiler  # noqa: F401
+    except Exception:
+        pass
 
 print("Load rspmm extension. This may take a while...")
 path = os.path.join(os.path.dirname(__file__), "source")

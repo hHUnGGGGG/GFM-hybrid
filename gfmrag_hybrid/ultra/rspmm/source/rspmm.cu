@@ -1,3 +1,5 @@
+#include <new>  // ensure placement operator new(size_t, void*) is visible to nvcc (newer MSVC)
+
 #include <ATen/cuda/CUDAContext.h>
 #include <THC/THCAtomics.cuh>
 

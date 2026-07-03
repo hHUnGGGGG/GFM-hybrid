@@ -25,12 +25,27 @@ def save_model_to_pretrained(
     torch.save({"model": model.state_dict()}, os.path.join(path, "model.pth"))
 
 
+def _remap_legacy_targets(obj: object) -> None:
+    """Checkpoint cũ lưu `_target_` với tên package cũ `gfmrag.*`.
+    Đổi sang `gfmrag_hybrid.*` để Hydra instantiate được sau khi đổi tên package."""
+    if isinstance(obj, dict):
+        target = obj.get("_target_")
+        if isinstance(target, str) and target.startswith("gfmrag."):
+            obj["_target_"] = "gfmrag_hybrid." + target[len("gfmrag."):]
+        for value in obj.values():
+            _remap_legacy_targets(value)
+    elif isinstance(obj, list):
+        for value in obj:
+            _remap_legacy_targets(value)
+
+
 def load_model_from_pretrained(path: str) -> tuple[torch.nn.Module, dict]:
     config_path = cached_file(path, "config.json")
     if config_path is None:
         raise FileNotFoundError(f"config.json not found in {path}")
     with open(config_path) as f:
         config = json.load(f)
+    _remap_legacy_targets(config)
     model = instantiate(config["model_config"])
     model_path = cached_file(path, "model.pth")
     if model_path is None:

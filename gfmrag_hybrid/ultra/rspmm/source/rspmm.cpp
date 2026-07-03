@@ -1,6 +1,8 @@
 #include <mutex>
 
 #include <ATen/Parallel.h>
+// pybind11 is included only in this .cpp (compiled by MSVC), never in .cu (nvcc).
+#include <torch/extension.h>
 
 #include "operator.cuh"
 #include "rspmm.h"
