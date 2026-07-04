@@ -131,7 +131,7 @@ st.markdown("""
 # ============================================================
 @st.cache_resource(show_spinner="⚙️ Đang khởi tạo AI Engine và Cơ sở dữ liệu Y khoa...")
 def load_system():
-    os.environ["OPENAI_API_KEY"] = "sk-BKvAG85L7hcOo5Co7tHq7UCIyTwhJbdE7awCcvEr4tpEl6Fx"
+    os.environ["OPENAI_API_KEY"] = ""
     if not GlobalHydra.instance().is_initialized():
         initialize(version_base=None, config_path="config")
     cfg = compose(config_name="stage3_qa_ircot_inference_chunks_vietnamese_medical")
